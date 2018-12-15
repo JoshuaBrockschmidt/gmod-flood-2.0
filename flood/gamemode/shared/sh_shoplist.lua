@@ -9,6 +9,7 @@ local weaponCount = 0
 --- Adds a prop to the prop list.
 -- @param prop Table describing prop.
 local function addProp(prop)
+  -- TODO: See if table.insert can be used
   propCount = propCount + 1
   Props[propCount] = prop
 end
@@ -16,6 +17,7 @@ end
 --- Adds a weapon to the weapon list.
 -- @param weapon Table describing weapon.
 local function addWeapon(weapon)
+  -- TODO: See if table.insert can be used
   weaponCount = weaponCount + 1
   Weapons[weaponCount] = weapon
 end
