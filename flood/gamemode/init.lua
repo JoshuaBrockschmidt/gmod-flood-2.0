@@ -27,22 +27,22 @@ for _, file in pairs (file.Find("flood/gamemode/client/vgui/*.lua", "LUA")) do
 	AddCSLuaFile("flood/gamemode/client/vgui/"..file)
 end
 
--- Timer ConVars! Yay!
+-- Timer ConVars
 CreateConVar("flood_build_time", 240, FCVAR_NOTIFY, "Time allowed for building (def: 240)")
-CreateConVar("flood_flood_time", 20, FCVAR_NOTIFY, "Time between build phase and fight phase (def: 20)")
+CreateConVar("flood_flood_time", 25, FCVAR_NOTIFY, "Time between build phase and fight phase (def: 25)")
 CreateConVar("flood_fight_time", 300, FCVAR_NOTIFY, "Time allowed for fighting (def: 300)")
-CreateConVar("flood_reset_time", 40, FCVAR_NOTIFY, "Time after fight phase to allow water to drain and other ending tasks (def: 40 - Dont recommend changing)")
+CreateConVar("flood_reset_time", 10, FCVAR_NOTIFY, "Time after fight phase to allow water to drain and other ending tasks (def: 10)")
 
 -- Cash Convars
 CreateConVar("flood_participation_cash", 50, FCVAR_NOTIFY, "Amount of cash given to a player every 5 seconds of being alive (def: 50)")
-CreateConVar("flood_bonus_cash", 300, FCVAR_NOTIFY, "Amount of cash given to the winner of a round (def: 300)")
+CreateConVar("flood_bonus_cash", 2000, FCVAR_NOTIFY, "Amount of cash given to the winner(s) of a round (def: 2000)")
 
 -- Water Hurt System
 CreateConVar("flood_wh_enabled", 1, FCVAR_NOTIFY, "Does the water hurt players - 1=true 2=false (def: 1)")
-CreateConVar("flood_wh_damage", 1, FCVAR_NOTIFY, "How much damage a player takes per cycle (def: 1)")
+CreateConVar("flood_wh_damage", 2, FCVAR_NOTIFY, "How much damage a player takes per cycle (def: 2)")
 
 -- Prop Limits
-CreateConVar("flood_max_player_props", 20, FCVAR_NOTIFY, "How many props a player can spawn (def: 30)")
+CreateConVar("flood_max_player_props", 20, FCVAR_NOTIFY, "How many props a player can spawn (def: 20)")
 CreateConVar("flood_max_donator_props", 30, FCVAR_NOTIFY, "How many props a donator can spawn (def: 30)")
 CreateConVar("flood_max_admin_props", 40, FCVAR_NOTIFY, "How many props an admin can spawn (def: 40)")
 
