@@ -3,34 +3,29 @@ Props = {}
 WeaponCategories = {}
 Weapons = {}
 
-local propCount = 0
-local weaponCount = 0
-
 --- Adds a prop to the prop list.
 -- @param prop Table describing prop.
 local function addProp(prop)
-  -- TODO: See if table.insert can be used
-  propCount = propCount + 1
-  Props[propCount] = prop
+  table.insert(Props, prop)
 end
 
 --- Adds a weapon to the weapon list.
 -- @param weapon Table describing weapon.
 local function addWeapon(weapon)
-  -- TODO: See if table.insert can be used
-  weaponCount = weaponCount + 1
-  Weapons[weaponCount] = weapon
+  table.insert(Weapons, weapon)
 end
 
 
--- Prop categories
+-- Add all prop categories.
 PropCategories[1] = "Bouyant Props"
 PropCategories[2] = "Armor Props"
 
--- Weapon categories
+
+-- Add all weapon categories.
 WeaponCategories[1] = "Basic Weapons"
 
--- Props
+
+-- Add all props.
 addProp({
     Description = "Wooden Table",
     Model = "models/props_c17/FurnitureTable002a.mdl",
@@ -248,7 +243,8 @@ addProp({
     DonatorOnly = false
 })
 
--- Weapons
+
+-- Add all weapons.
 addWeapon({
     Name = "Crossbow",
     Model = "models/weapons/w_crossbow.mdl",
