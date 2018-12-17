@@ -1,19 +1,18 @@
 util.AddNetworkString("RoundState")
 GM.GameState = GAMEMODE and GAMEMODE.GameState or 0
 
---
--- Game States
--- 0 = Waiting for players to join
--- 1 = Building Phase
--- 2 = Flood Phase
--- 3 = Fight Phase
--- 4 = Reset Phase
---
-
+--- Get the game state.
+-- @return Integer indicating the current game state.
+-- @see ../shared/sh_gamestates.lua for state enumerators. These constants should be used
+--    to improve readability.
 function GM:GetGameState()
   return self.GameState
 end
 
+--- Set the game state.
+-- @param state Integer indicating the new game state.
+-- @see ../shared/sh_gamestates.lua for state enumerators. These constants should be used
+--    to improve readability.
 function GM:SetGameState(state)
   self.GameState = state
 end
@@ -26,26 +25,47 @@ function GM:GetStateRunningTime()
   return CurTime() - self.StateStart
 end
 
+function GM:ResetAllTimers()
+  Flood_buildTime = GetConVar("flood_build_time"):GetFloat()
+  Flood_boardTime = GetConVar("flood_board_time"):GetFloat()
+  Flood_floodTime = GetConVar("flood_flood_time"):GetFloat()
+  Flood_fightTime = GetConVar("flood_fight_time"):GetFloat()
+  Flood_resetTime = GetConVar("flood_reset_time"):GetFloat()
+end
+
+function GM:InitializeRoundController()
+  --self:ResetAllTimers() -- TODO: Use this instead.
+  Flood_buildTime = GetConVar("flood_build_time"):GetFloat()
+  Flood_boardTime = GetConVar("flood_board_time"):GetFloat()
+  Flood_floodTime = GetConVar("flood_flood_time"):GetFloat()
+  Flood_fightTime = GetConVar("flood_fight_time"):GetFloat()
+  Flood_resetTime = GetConVar("flood_reset_time"):GetFloat()
+
+  hook.Add("Think", "Flood_TimeController", function() hook.Call("TimerController", GAMEMODE) end)
+end
+
 local tNextThink = 0
 function GM:TimerController()
   if CurTime() >= tNextThink then
-    if self:GetGameState() == 0 then
-      self:CheckPhase()
-    elseif self:GetGameState() == 1 then
+    if self:GetGameState() == FLOOD_GS_WAIT then
+      self:WaitPhase()
+    elseif self:GetGameState() == FLOOD_GS_BUILD then
       self:BuildPhase()
-    elseif self:GetGameState() == 2 then
+    elseif self:GetGameState() == FLOOD_GS_BOARD then
+      self:BoardPhase()
+    elseif self:GetGameState() == FLOOD_GS_FLOOD then
       self:FloodPhase()
-    elseif self:GetGameState() == 3 then
+    elseif self:GetGameState() == FLOOD_GS_FIGHT then
       self:FightPhase()
-    elseif self:GetGameState() == 4 then
+    elseif self:GetGameState() == FLOOD_GS_RESET then
       self:ResetPhase()
     end
 
-     -- Because gamestate was nil every other way.
     local gState = self:GetGameState()
     net.Start("RoundState")
     net.WriteFloat(gState)
     net.WriteFloat(Flood_buildTime)
+    net.WriteFloat(Flood_boardTime)
     net.WriteFloat(Flood_floodTime)
     net.WriteFloat(Flood_fightTime)
     net.WriteFloat(Flood_resetTime)
@@ -55,25 +75,26 @@ function GM:TimerController()
   end
 end
 
-function GM:CheckPhase()
-  local count = 0
-  for _, v in pairs(player.GetAll()) do
-    if IsValid(v) and v:Alive() then
-      count = count + 1
+--- Starts the building phase when two or more players are present.
+function GM:WaitPhase()
+  local plyCount = 0
+  for _, ply in pairs(player.GetAll()) do
+    if IsValid(ply) then
+      plyCount = plyCount + 1
     end
   end
 
-  if count >= 2 then
-    -- Time to build.
-    self:SetGameState(1)
+  if plyCount >= 2 then
+    -- Initiate building phase.
+    self:SetGameState(FLOOD_GS_BUILD)
 
     -- Clean the map, game is about to start.
-    self:CleanupMap()
+    self:CleanUpMap()
 
     -- Respawn all the players.
-    for _, v in pairs(player.GetAll()) do
-      if IsValid(v) then
-	v:Spawn()
+    for _, ply in pairs(player.GetAll()) do
+      if IsValid(ply) then
+	ply:Spawn()
       end
     end
   end
@@ -81,33 +102,21 @@ end
 
 function GM:BuildPhase()
   if Flood_buildTime <= 0 then
-    -- Time to Flood.
-    self:SetGameState(2)
+    -- Initialze boarding phase.
+    self:SetGameState(FLOOD_GS_BOARD)
 
-    -- Nobody can respawn now.
-    for _, v in pairs(player.GetAll()) do
-      if IsValid(v) then
-	v:SetCanRespawn(false)
-      end
-    end
-
-    -- Prep phase two.
-    for _, v in pairs(self:GetActivePlayers()) do
-      v:StripWeapons()
-      v:RemoveAllAmmo()
-      v:SetHealth(100)
-      v:SetArmor(0)
-    end
-
-    -- Remove teh shitty windows that are above players.
-    for _, v in pairs(ents.FindByClass("func_breakable")) do
-      v:Fire("Break", "", 0)
+    -- Remove all items and reset health of all players.
+    for _, ply in pairs(self:GetActivePlayers()) do
+      ply:StripWeapons()
+      ply:RemoveAllAmmo()
+      ply:SetHealth(100)
+      ply:SetArmor(0)
     end
 
     -- Unfreeze everything.
-    for _, v in pairs(ents.GetAll()) do
-      if IsValid(v) then
-	local phys = v:GetPhysicsObject()
+    for _, ent in pairs(ents.GetAll()) do
+      if IsValid(ent) then
+	local phys = ent:GetPhysicsObject()
 
 	if phys:IsValid() then
 	  phys:EnableMotion(true)
@@ -115,20 +124,41 @@ function GM:BuildPhase()
 	end
       end
     end
-
-    -- Raise the water.
-    self:RiseAllWaterControllers()
   else
     Flood_buildTime = Flood_buildTime - 1
   end
 end
 
+function GM:BoardPhase()
+  if Flood_boardTime <= 0 then
+    -- Initiate flooding phase.
+    self:SetGameState(FLOOD_GS_FLOOD)
+
+    -- Nobody can respawn now.
+    for _, ply in pairs(player.GetAll()) do
+      if IsValid(ply) then
+	ply:SetCanRespawn(false)
+      end
+    end
+
+    -- Remove any ceiling above players.
+    for _, ceiling in pairs(ents.FindByClass("func_breakable")) do
+      ceiling:Fire("Break")
+    end
+
+    -- Raise the water.
+    self:RiseAllWaterControllers()
+  else
+    Flood_boardTime = Flood_boardTime - 1
+  end
+end
+
 function GM:FloodPhase()
   if Flood_floodTime <= 0 then
-    -- Time to kill.
-    self:SetGameState(3)
+    -- Initiate fighing phase.
+    self:SetGameState(FLOOD_GS_FIGHT)
 
-    -- Its time to fight!
+    -- Give all players weapons.
     self:GivePlayerWeapons()
   else
     Flood_floodTime = Flood_floodTime - 1
@@ -137,13 +167,13 @@ end
 
 function GM:FightPhase()
   if Flood_fightTime <= 0 then
-    -- Time to Reset
-    self:SetGameState(4)
+    -- Reset round.
+    self:SetGameState(FLOOD_GS_RESET)
 
-    -- Lower Water
+    -- Lower water.
     self:LowerAllWaterControllers()
 
-    -- Declare winner is nobody because time ran out
+    -- Declare winner is nobody because time ran out.
     self:DeclareWinner(3)
   else
     Flood_fightTime = Flood_fightTime - 1
@@ -153,34 +183,39 @@ end
 
 function GM:ResetPhase()
   if Flood_resetTime <= 0 then
-    -- Time to wait for players (if players exist, should go to build phase)
-    self:SetGameState(0)
+    -- Time to wait for players. If more than two players are online, the build phase will be
+    -- automatically initiated.
+    self:SetGameState(FLOOD_GS_WAIT)
 
-    -- Give people their money
-    self:RefundAllProps()
+    self:CleanUpMap()
 
-    -- Game is over, lets tidy up the players
-    for _, v in pairs(player.GetAll()) do
-      if IsValid(v) then
-	v:SetCanRespawn(true)
+    -- Force respawn all players, living and dead.
+    for _, ply in pairs(player.GetAll()) do
+      if IsValid(ply) then
+	-- Silently kill any living players.
+	if ply:Alive() then
+	  ply:KillSilent()
+	end
 
-	-- Wait till they respawn
+	ply:SetCanRespawn(true)
+
+	-- Wait until they respawn.
 	timer.Simple(
 	  0,
 	  function()
-	    v:StripWeapons()
-	    v:RemoveAllAmmo()
-	    v:SetHealth(100)
-	    v:SetArmor(0)
+	    ply:StripWeapons()
+	    ply:RemoveAllAmmo()
+	    ply:SetHealth(100)
+	    ply:SetArmor(0)
 
 	    timer.Simple(
 	      0,
 	      function()
-		v:Give("gmod_tool")
-		v:Give("weapon_physgun")
-		v:Give("flood_propseller")
+		ply:Give("gmod_tool")
+		ply:Give("weapon_physgun")
+		ply:Give("flood_propseller")
 
-		v:SelectWeapon("weapon_physgun")
+		ply:SelectWeapon("weapon_physgun")
 	      end
 	    )
 	  end
@@ -188,25 +223,9 @@ function GM:ResetPhase()
       end
     end
 
-    -- Reset all the round timers
+    -- Reset all the round timers.
     self:ResetAllTimers()
   else
     Flood_resetTime = Flood_resetTime - 1
   end
-end
-
-function GM:InitializeRoundController()
-  Flood_buildTime = GetConVar("flood_build_time"):GetFloat()
-  Flood_floodTime = GetConVar("flood_flood_time"):GetFloat()
-  Flood_fightTime = GetConVar("flood_fight_time"):GetFloat()
-  Flood_resetTime = GetConVar("flood_reset_time"):GetFloat()
-
-  hook.Add("Think", "Flood_TimeController", function() hook.Call("TimerController", GAMEMODE) end)
-end
-
-function GM:ResetAllTimers()
-  Flood_buildTime = GetConVar("flood_build_time"):GetFloat()
-  Flood_floodTime = GetConVar("flood_flood_time"):GetFloat()
-  Flood_fightTime = GetConVar("flood_fight_time"):GetFloat()
-  Flood_resetTime = GetConVar("flood_reset_time"):GetFloat()
 end

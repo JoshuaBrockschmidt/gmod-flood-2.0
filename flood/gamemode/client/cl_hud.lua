@@ -1,7 +1,7 @@
 surface.CreateFont(
   "Flood_HUD_Small",
   {
-    font = "Tehoma",
+    font = "Arial",
     size = 14,
     weight = 500,
     antialias = true
@@ -10,7 +10,7 @@ surface.CreateFont(
 surface.CreateFont(
   "Flood_HUD",
   {
-    font = "Tehoma",
+    font = "Arial",
     size = 16,
     weight = 500,
     antialias = true
@@ -19,7 +19,7 @@ surface.CreateFont(
 surface.CreateFont(
   "Flood_HUD_Large",
   {
-    font = "Tehoma",
+    font = "Arial",
     size = 30,
     weight = 500,
     antialias = true
@@ -28,31 +28,33 @@ surface.CreateFont(
 surface.CreateFont(
   "Flood_HUD_B",
   {
-    font = "Tehoma",
+    font = "Arial",
     size = 18,
     weight = 600,
     antialias = true
 })
 
--- Hud Stuff
+local x = ScrW()
+local y = ScrH()
+
+-- HUD variables.
 local color_grey = Color(120, 120, 120, 100)
 local color_black = Color(0, 0, 0, 200)
 local active_color = Color(24, 24, 24, 255)
 local outline_color = Color(0, 0, 0, 255)
-local x = ScrW()
-local y = ScrH()
 
--- Timer Stuff
+-- Timer variables.
 local GameState = 0
 local BuildTimer = -1
+local BoardTimer = -1
 local FloodTimer = -1
 local FightTimer = -1
 local ResetTimer = -1
 
-local xPos = x * 0.0025
+local xPos = x * 0.004
 local yPos = y * 0.005
 
--- Hud Positioning
+-- HUD positioning.
 local Spacer = y * 0.006
 local xSize = x * 0.2
 local ySize = y * 0.04
@@ -64,6 +66,7 @@ net.Receive(
   function(len)
     GameState = net.ReadFloat()
     BuildTimer = net.ReadFloat()
+    BoardTimer = net.ReadFloat()
     FloodTimer = net.ReadFloat()
     FightTimer = net.ReadFloat()
     ResetTimer = net.ReadFloat()
@@ -71,106 +74,133 @@ net.Receive(
 )
 
 function GM:HUDPaint()
-  if BuildTimer and FloodTimer and FightTimer and ResetTimer then
-    if GameState == 0 then
-      draw.RoundedBoxEx(6, xPos, y * 0.005, x * 0.175,  x * 0.018, active_color,
-			true, true, false, false)
+  if BuildTimer and BoardTimer and FloodTimer and FightTimer and ResetTimer then
+    -- Draw boxes indicating the current game phase and the time remaining
+    -- for each phase (if applicable).
 
-      draw.SimpleText("Waiting for players.", "Flood_HUD", x * 0.01, y * 0.01, color_white, 0, 0)
-      draw.SimpleText("Build a boat.", "Flood_HUD", x * 0.01, y * 0.044, color_grey, 0, 0)
-      draw.SimpleText("Get on your boat!", "Flood_HUD", x * 0.01, y * 0.078, color_grey, 0, 0)
-      draw.SimpleText("Destroy enemy boats!", "Flood_HUD", x * 0.01, y * 0.115, color_grey, 0, 0)
-      draw.SimpleText("Restarting the round.", "Flood_HUD", x * 0.01, y * 0.151, color_grey, 0, 0)
+    local boxW = x * 0.175
+    local labelX = x * 0.01
+    local timerX = x * 0.15
+
+    -- Waiting for players to join.
+    boxY0 = y * 0.005
+    textY0 = boxY0 + Spacer
+    if GameState == FLOOD_GS_WAIT then
+      -- We subtract 1 from the x coordinate and width to align with the other boxes.
+      draw.RoundedBoxEx(
+	6, xPos - 1, boxY0, boxW - 1,  x * 0.018, active_color, true, true, false, false
+      )
+      draw.SimpleText("Waiting for players...", "Flood_HUD", labelX, textY0, color_white, 0, 0)
     else
-      draw.RoundedBoxEx(6, xPos, y * 0.005, x * 0.175,  x * 0.018, color_grey,
-			true, true, false, false)
+      -- We subtract 1 from the x coordinate and width to align with the other boxes.
+      draw.RoundedBoxEx(
+	6, xPos - 1, boxY0, boxW - 1,  x * 0.018, color_grey, true, true, false, false
+      )
+      draw.SimpleText("Waiting for players...", "Flood_HUD", labelX, textY0, color_grey, 0, 0)
     end
 
-    if GameState == 1 then
-      draw.RoundedBox(0, xPos, yPos + (Spacer * 6), x * 0.175,  x * 0.018, active_color)
-      draw.SimpleText(BuildTimer, "Flood_HUD", x * 0.15, y * 0.044, color_white, 0, 0)
-
-      draw.SimpleText("Waiting for players.", "Flood_HUD", x * 0.01, y * 0.01, color_grey, 0, 0)
-      draw.SimpleText("Build a boat.", "Flood_HUD", x * 0.01, y * 0.044, color_white, 0, 0)
-      draw.SimpleText("Get on your boat!", "Flood_HUD", x * 0.01, y * 0.078, color_grey, 0, 0)
-      draw.SimpleText("Destroy enemy boats!", "Flood_HUD", x * 0.01, y * 0.115, color_grey, 0, 0)
-      draw.SimpleText("Restarting the round.", "Flood_HUD", x * 0.01, y * 0.151, color_grey, 0, 0)
+    -- Boat building phase.
+    local boxY1 = yPos + (Spacer * 6)
+    local textY1 = boxY1 + Spacer * 0.7
+    if GameState == FLOOD_GS_BUILD then
+      draw.RoundedBox(0, xPos, boxY1, boxW,  x * 0.018, active_color)
+      draw.SimpleText("Build a boat.", "Flood_HUD", labelX, textY1, color_white, 0, 0)
+      draw.SimpleText(BuildTimer, "Flood_HUD", timerX, textY1, color_white, 0, 0)
     else
-      draw.RoundedBox(0, xPos, yPos + (Spacer * 6), x * 0.175,  x * 0.018, color_grey)
-      draw.SimpleText(BuildTimer, "Flood_HUD", x * 0.15, y * 0.044, color_grey, 0, 0)
+      draw.RoundedBox(0, xPos, boxY1, boxW,  x * 0.018, color_grey)
+      draw.SimpleText("Build a boat.", "Flood_HUD", labelX, textY1, color_grey, 0, 0)
+      draw.SimpleText(BuildTimer, "Flood_HUD", timerX, textY1, color_grey, 0, 0)
     end
 
-    if GameState == 2 then
-      draw.RoundedBox(0, xPos, yPos + (Spacer * 12), x * 0.175,  x * 0.018, active_color)
-      draw.SimpleText(FloodTimer, "Flood_HUD", x * 0.15, y * 0.078, color_white, 0, 0)
-
-      draw.SimpleText("Waiting for players.", "Flood_HUD", x * 0.01, y * 0.01, color_grey, 0, 0)
-      draw.SimpleText("Build a boat.", "Flood_HUD", x * 0.01, y * 0.044, color_grey, 0, 0)
-      draw.SimpleText("Get on your boat!", "Flood_HUD", x * 0.01, y * 0.078, color_white, 0, 0)
-      draw.SimpleText("Destroy enemy boats!", "Flood_HUD", x * 0.01, y * 0.115, color_grey, 0, 0)
-      draw.SimpleText("Restarting the round.", "Flood_HUD", x * 0.01, y * 0.151, color_grey, 0, 0)
+    -- Boat boarding phase.
+    local boxY2 = yPos + (Spacer * 12)
+    local textY2 = boxY2 + Spacer * 0.7
+    if GameState == FLOOD_GS_BOARD then
+      draw.RoundedBox(0, xPos, boxY2, boxW,  x * 0.018, active_color)
+      draw.SimpleText("Get on your boat!", "Flood_HUD", labelX, textY2, color_white, 0, 0)
+      draw.SimpleText(BoardTimer, "Flood_HUD", timerX, textY2, color_white, 0, 0)
     else
-      draw.RoundedBox(0, xPos, yPos + (Spacer * 12), x * 0.175,  x * 0.018, color_grey)
-      draw.SimpleText(FloodTimer, "Flood_HUD", x * 0.15, y * 0.078, color_grey, 0, 0)
+      draw.RoundedBox(0, xPos, boxY2, boxW,  x * 0.018, color_grey)
+      draw.SimpleText("Get on your boat!", "Flood_HUD", labelX, textY2, color_grey, 0, 0)
+      draw.SimpleText(BoardTimer, "Flood_HUD", timerX, textY2, color_grey, 0, 0)
     end
 
-    if GameState == 3 then
-      draw.RoundedBox(0, xPos, yPos + (Spacer * 18), x * 0.175,  x * 0.018, active_color)
-
-      draw.SimpleText(FightTimer, "Flood_HUD", x * 0.15, y * 0.115, color_white, 0, 0)
-      draw.SimpleText("Waiting for players.", "Flood_HUD", x * 0.01, y * 0.01, color_grey, 0, 0)
-      draw.SimpleText("Build a boat.", "Flood_HUD", x * 0.01, y * 0.044, color_grey, 0, 0)
-      draw.SimpleText("Get on your boat!", "Flood_HUD", x * 0.01, y * 0.078, color_grey, 0, 0)
-      draw.SimpleText("Destroy enemy boats!", "Flood_HUD", x * 0.01, y * 0.115, color_white, 0, 0)
-      draw.SimpleText("Restarting the round.", "Flood_HUD", x * 0.01, y * 0.151, color_grey, 0, 0)
+    -- Flooding phase.
+    local boxY3 = yPos + (Spacer * 18)
+    local textY3 = boxY3 + Spacer * 0.7
+    if GameState == FLOOD_GS_FLOOD then
+      draw.RoundedBox(0, xPos, boxY3, boxW,  x * 0.018, active_color)
+      draw.SimpleText("Water rising...", "Flood_HUD", labelX, textY3, color_white, 0, 0)
+      draw.SimpleText(FloodTimer, "Flood_HUD", timerX, textY3, color_white, 0, 0)
     else
-      draw.RoundedBox(0, xPos, yPos + (Spacer * 18), x * 0.175,  x * 0.018, color_grey)
-      draw.SimpleText(FightTimer, "Flood_HUD", x * 0.15, y * 0.115, color_grey, 0, 0)
+      draw.RoundedBox(0, xPos, boxY3, boxW,  x * 0.018, color_grey)
+      draw.SimpleText("Water rising...", "Flood_HUD", labelX, textY3, color_grey, 0, 0)
+      draw.SimpleText(FloodTimer, "Flood_HUD", timerX, textY3, color_grey, 0, 0)
     end
 
-    if GameState == 4 then
-      draw.RoundedBoxEx(6, xPos, yPos + (Spacer * 24), x * 0.175,  x * 0.018, active_color,
-			false, false, true, true)
-
-      draw.SimpleText(ResetTimer, "Flood_HUD", x * 0.15, y * 0.151, color_white, 0, 0)
-      draw.SimpleText("Waiting for players.", "Flood_HUD", x * 0.01, y * 0.01, color_grey, 0, 0)
-      draw.SimpleText("Build a boat.", "Flood_HUD", x * 0.01, y * 0.044, color_grey, 0, 0)
-      draw.SimpleText("Get on your boat!", "Flood_HUD", x * 0.01, y * 0.078, color_grey, 0, 0)
-      draw.SimpleText("Destroy enemy boats!", "Flood_HUD", x * 0.01, y * 0.115, color_grey, 0, 0)
-      draw.SimpleText("Restarting the round.", "Flood_HUD", x * 0.01, y * 0.151, color_white, 0, 0)
+    -- Destroy enemy boats.
+    local boxY4 = yPos + (Spacer * 24)
+    local textY4 = boxY4 + Spacer * 0.7
+    if GameState == FLOOD_GS_FIGHT then
+      draw.RoundedBox(0, xPos, boxY4, boxW,  x * 0.018, active_color)
+      draw.SimpleText("Destroy enemy boats!", "Flood_HUD", labelX, textY4, color_white, 0, 0)
+      draw.SimpleText(FightTimer, "Flood_HUD", timerX, textY4, color_white, 0, 0)
     else
-      draw.RoundedBoxEx(6,xPos, yPos + (Spacer * 24), x * 0.175,  x * 0.018, color_grey,
-			false, false, true, true)
-      draw.SimpleText(ResetTimer, "Flood_HUD", x * 0.15, y * 0.151, color_grey, 0, 0)
+      draw.RoundedBox(0, xPos, boxY4, boxW,  x * 0.018, color_grey)
+      draw.SimpleText("Destroy enemy boats!", "Flood_HUD", labelX, textY4, color_grey, 0, 0)
+      draw.SimpleText(FightTimer, "Flood_HUD", timerX, textY4, color_grey, 0, 0)
+    end
+
+    -- Restarting the round.
+    local boxY5 = yPos + (Spacer * 30)
+    local textY5 = boxY5 + Spacer * 0.7
+    if GameState == FLOOD_GS_RESET then
+      -- We subtract 1 from the x coordinate and width to align with the other boxes.
+      draw.RoundedBoxEx(
+	6, xPos - 1, boxY5, boxW - 1,  x * 0.018, active_color, false, false, true, true
+      )
+      draw.SimpleText("Restarting the round.", "Flood_HUD", labelX, textY5, color_white, 0, 0)
+      draw.SimpleText(ResetTimer, "Flood_HUD", timerX, textY5, color_white, 0, 0)
+    else
+      -- We subtract 1 from the x coordinate and width to align with the other boxes.
+      draw.RoundedBoxEx(
+	6, xPos - 1, boxY5, boxW - 1,  x * 0.018, color_grey, false, false, true, true
+      )
+      draw.SimpleText("Restarting the round.", "Flood_HUD", labelX, textY5, color_grey, 0, 0)
+      draw.SimpleText(ResetTimer, "Flood_HUD", timerX, textY5, color_grey, 0, 0)
     end
   end
 
-  -- Display Prop's Health
+  -- Get entity player `is looking at.
   local tr = util.TraceLine(util.GetPlayerTrace(LocalPlayer()))
-  if tr.Entity:IsValid() and not tr.Entity:IsPlayer() then
-    if tr.Entity:GetNWInt("CurrentPropHealth") == "" or
-      tr.Entity:GetNWInt("CurrentPropHealth") == nil or
-      tr.Entity:GetNWInt("CurrentPropHealth") == NULL
+  local ent = tr.Entity
+
+  -- Display prop's health if it is owned by a player.
+  if ent:IsValid() and not ent:IsPlayer() and NADMOD.PropOwners[ent:EntIndex()] then
+    if ent:GetNWInt("CurrentPropHealth") == "" or
+      ent:GetNWInt("CurrentPropHealth") == nil or
+      ent:GetNWInt("CurrentPropHealth") == NULL
     then
       draw.SimpleText("Fetching Health", "Flood_HUD_Small", x * 0.5, y * 0.5 - 25, color_white, 1, 1)
     else
-      draw.SimpleText("Health: " .. tr.Entity:GetNWInt("CurrentPropHealth"), "Flood_HUD_Small",
+      draw.SimpleText("Health: " .. ent:GetNWInt("CurrentPropHealth"), "Flood_HUD_Small",
 		      x * 0.5, y * 0.5 - 25, color_white, 1, 1)
     end
   end
 
-  -- Display Player's Health and Name
-  if tr.Entity:IsValid() and tr.Entity:IsPlayer() then
-    draw.SimpleText("Name: " .. tr.Entity:GetName(), "Flood_HUD_Small",
+  -- Display player's health and name.
+  if ent:IsValid() and ent:IsPlayer() then
+    draw.SimpleText("Name: " .. ent:GetName(), "Flood_HUD_Small",
 		    x * 0.5, y * 0.5 - 75, color_white, 1, 1)
-    draw.SimpleText("Health: " .. tr.Entity:Health(), "Flood_HUD_Small",
+    draw.SimpleText("Health: " .. ent:Health(), "Flood_HUD_Small",
 		    x * 0.5, y * 0.5 - 60, color_white, 1, 1)
   end
 
-  -- Bottom left HUD Stuff
+  -- Bottom left HUD stuff.
   if LocalPlayer():Alive() and IsValid(LocalPlayer()) then
-    draw.RoundedBox(6, 4, y - ySize - Spacer - (bHeight * 2), bWidth, bHeight * 2 + ySize,
-		    Color(24, 24, 24, 255))
+    draw.RoundedBox(
+      6, 4, y - ySize - Spacer - (bHeight * 2), bWidth, bHeight * 2 + ySize, Color(24, 24, 24, 255)
+    )
 
     -- Health
     local pHealth = LocalPlayer():Health()

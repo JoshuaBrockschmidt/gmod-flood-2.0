@@ -137,7 +137,9 @@ local function Flood_SetTime(ply, txt)
   if command[1] == "!settime" then
     local ct = ChatText()
     if ply:IsAdmin() then
-      if command[2] == "build" then
+      -- TODO: Verify parameters.
+      local phase = command[2]
+      if phase == "build" then
 	if Flood_buildTime then
 	  Flood_buildTime = tonumber(command[3])
 
@@ -149,7 +151,18 @@ local function Flood_SetTime(ply, txt)
 	  ct:AddText("Build timer couldn't be found.")
 	  ct:Send(ply)
 	end
-      elseif command[2] == "flood" then
+      elseif phase == "board" then
+	if Flood_boardTime then
+	  Flood_boardTime = tonumber(command[3])
+	  ct:AddText("[Flood] ", Color(132, 199, 29, 255))
+	  ct:AddText("You have set the flood time for this round to " .. command[3])
+	  ct:Send(ply)
+	else
+	  ct:AddText("[Flood] ", Color(158, 49, 49, 255))
+	  ct:AddText("Board timer couldn't be found.")
+	  ct:Send(ply)
+	end
+      elseif phase == "flood" then
 	if Flood_floodTime then
 	  Flood_floodTime = tonumber(command[3])
 	  ct:AddText("[Flood] ", Color(132, 199, 29, 255))
@@ -160,7 +173,7 @@ local function Flood_SetTime(ply, txt)
 	  ct:AddText("Flood timer couldn't be found.")
 	  ct:Send(ply)
 	end
-      elseif command[2] == "fight" then
+      elseif phase == "fight" then
 	if Flood_fightTime then
 	  Flood_fightTime = tonumber(command[3])
 	  ct:AddText("[Flood] ", Color(132, 199, 29, 255))
@@ -171,7 +184,7 @@ local function Flood_SetTime(ply, txt)
 	  ct:AddText("Fight timer couldn't be found.")
 	  ct:Send(ply)
 	end
-      elseif command[2] == "reset" then
+      elseif phase == "reset" then
 	if Flood_resetTime then
 	  Flood_resetTime = tonumber(command[3])
 	  ct:AddText("[Flood] ", Color(132, 199, 29, 255))

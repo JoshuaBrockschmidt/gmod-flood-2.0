@@ -14,7 +14,9 @@ function GM:PlayerInitialSpawn(ply)
   local col = team.GetColor(TEAM_PLAYER)
   ply:SetPlayerColor(Vector(col.r / 255, col.g / 255, col.b / 255))
 
-  if self:GetGameState() >= 2 then
+  -- Disallow respawning if it is during or after the water rising phase.
+  local gs = self:GetGameState()
+  if gs == FLOOD_GS_FLOOD or gs == FLOOD_GS_FIGHT or gs == FLOOD_GS_RESET then
     timer.Simple(
       0,
       function ()
@@ -36,6 +38,14 @@ function GM:PlayerSpawn(ply)
   ply:UnSpectate()
   ply:SetCollisionGroup(COLLISION_GROUP_WEAPON)
   ply:SetPlayerColor(ply:GetPlayerColor())
+
+  -- Strip all items from player if they are spawning during the boarding phase.
+  if self:GetGameState() == FLOOD_GS_BOARD then
+    ply:StripWeapons()
+    ply:RemoveAllAmmo()
+    ply:SetHealth(100)
+    ply:SetArmor(0)
+  end
 end
 
 function GM:ForcePlayerSpawn()
@@ -213,6 +223,7 @@ function PlayerMeta:LoadData()
   end
 end
 
+-- TODO: Make sure player's props are refunded
 function PlayerLeft(ply)
   ply:Save()
 end
@@ -240,7 +251,10 @@ function GM:PurchaseProp(ply, cmd, args)
   local tr = util.TraceLine(util.GetPlayerTrace(ply))
   local ct = ChatText()
 
-  if ply.Allow and Prop and self:GetGameState() <= 1 then
+  -- Only allow props to be spawned during the building and waiting phases.
+  local gs = self:GetGameState()
+  if ply.Allow and Prop and (gs == FLOOD_GS_WAIT or gs == FLOOD_GS_BUILD) then
+    -- Only allow donators to spawn donator props.
     if Prop.DonatorOnly == true and not ply:IsDonator() then
       ct:AddText("[Flood] ", Color(158, 49, 49, 255))
       ct:AddText(Prop.Description .. " is a donator only item!")
@@ -322,7 +336,9 @@ function GM:PurchaseWeapon(ply, cmd, args)
   local Weapon = Weapons[math.floor(args[1])]
   local ct = ChatText()
 
-  if ply.Allow and Weapon and self:GetGameState() <= 1 then
+  local gs = self:GetGameState()
+  -- Only allow weapons to be bought during the building and waiting phases.
+  if ply.Allow and Weapon and (gs == FLOOD_GS_BUILD or gs == FLOOD_GS_WAIT) then
     if table.HasValue(ply.Weapons, Weapon.Class) then
       ct:AddText("[Flood] ", Color(158, 49, 49, 255))
       ct:AddText("You already own a(n) " .. Weapon.Name .. "!")
@@ -356,4 +372,9 @@ function GM:PurchaseWeapon(ply, cmd, args)
     ct:Send(ply)
   end
 end
-concommand.Add("FloodPurchaseWeapon", function(ply, cmd, args) hook.Call("PurchaseWeapon", GAMEMODE, ply, cmd, args) end)
+concommand.Add(
+  "FloodPurchaseWeapon",
+  function(ply, cmd, args)
+    hook.Call("PurchaseWeapon", GAMEMODE, ply, cmd, args)
+  end
+)

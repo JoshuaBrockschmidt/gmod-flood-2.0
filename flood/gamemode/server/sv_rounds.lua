@@ -1,10 +1,14 @@
-local function PlayerIsFriend(ply, ply2)
-  if not IsValid(ply) or not IsValid(ply2) then
+--- Checks if a player is a friend of another.
+-- @param ply First player.
+-- @param ply2 Second player.
+-- @return True if first player and second player are friends of each other, and false otherwise.
+local function PlayerIsFriend(ply1, ply2)
+  if not IsValid(ply1) or not IsValid(ply2) then
     return
   end
 
-  for k, v in pairs(ply:CPPIGetFriends()) do
-    if v == ply2 then
+  for _, friend in pairs(ply1:CPPIGetFriends()) do
+    if friend == ply2 then
       return true
     end
   end
@@ -12,36 +16,40 @@ local function PlayerIsFriend(ply, ply2)
   return false
 end
 
+--- Gets all living players.
+-- @return a table of all living players.
 function GM:GetActivePlayers()
   local players = {}
-  for _, v in pairs(player.GetAll()) do
-    if IsValid(v) and v:Alive() then
-      table.insert(players, v)
+  for _, ply in pairs(player.GetAll()) do
+    if IsValid(ply) and ply:Alive() then
+      table.insert(players, ply)
     end
   end
 
   return players
 end
 
+--- Checks if there is a winner. Only works during the fighting phase.
 function GM:CheckForWinner()
-  if self:GetGameState() == 3 then
+  -- If it is the fighing phase, check for a winner.
+  if self:GetGameState() == FLOOD_GS_FIGHT then
     local players = self:GetActivePlayers()
     local count = #players
     if count == 1 then
       winner = players[1]
     end
 
-    -- Determine team conditions
+    -- Determine team conditions.
     local AllAreFriends = true
-    for k, ply in pairs(players) do
+    for k, ply1 in pairs(players) do
       for x, ply2 in pairs(players) do
 	-- Dont look at the same person
-	if ply == ply2 then
+	if ply1 == ply2 then
 	  continue
 	end
 
 	-- Is player one friends with player two, and is player two friends with player one?
-	if PlayerIsFriend(ply, ply2) and PlayerIsFriend(ply2, ply) then
+	if PlayerIsFriend(ply1, ply2) and PlayerIsFriend(ply2, ply1) then
 	  continue
 	else
 	  AllAreFriends = false
@@ -50,27 +58,37 @@ function GM:CheckForWinner()
       end
     end
 
-    -- Determine if we have winners
-    if AllAreFriends == true and #players != 0 then
+    -- Determine if there are any winners.
+    doReset = false
+    if AllAreFriends == true and count != 0 then
+      -- A group of players won.
       self:DeclareWinner(0, players)
-      self:SetGameState(4)
-      self:LowerAllWaterControllers()
+      doReset = true
     elseif count == 1 and winner != nil then
+      -- A single player won..
       self:DeclareWinner(1, winner)
-      self:SetGameState(4)
-      self:LowerAllWaterControllers()
+      doReset = true
     elseif count == 0 and winner == nil then
+      -- Nobody won.
       self:DeclareWinner(2, winner)
-      self:SetGameState(4)
+      doReset = true
+    end
+
+    if doReset then
+      self:SetGameState(FLOOD_GS_RESET)
       self:LowerAllWaterControllers()
     end
   end
 end
 
-function GM:DeclareWinner(case, ply)
-  if case == 0 and type(ply) == "table" then
-    for _, v in pairs(ply) do
-      if IsValid(v) and v:Alive() and self:GetGameState() == 3 then
+--- Declares the winner(s) and distributes prize money to them.
+-- @param case 0 if a group of players has won, 1 if a single player has won, and 0 if not player
+--    has won.
+-- @param winner Table of players for case 0, a single player for case 1, and nothing for case 2 or 3.
+function GM:DeclareWinner(case, winner)
+  if case == 0 and type(winner) == "table" then
+    for _, v in pairs(winner) do
+      if IsValid(v) and v:Alive() and self:GetGameState() == FLOOD_GS_FIGHT then
 	local cash = GetConVar("flood_bonus_cash"):GetInt()
 	v:AddCash(cash)
 
@@ -81,14 +99,14 @@ function GM:DeclareWinner(case, ply)
 	ct:SendAll()
       end
     end
-  elseif case == 1 and IsValid(ply) then
-    if ply:Alive() and IsValid(ply) and self:GetGameState() == 3 then
+  elseif case == 1 and IsValid(winner) then
+    if winner:Alive() and IsValid(winner) and self:GetGameState() == FLOOD_GS_FIGHT then
       local cash = GetConVar("flood_bonus_cash"):GetInt()
-      ply:AddCash(cash)
+      winner:AddCash(cash)
 
       local ct = ChatText()
       ct:AddText("[Flood] ", Color(132, 199, 29, 255))
-      ct:AddText(ply:Nick(), self:FormatColor(ply:GetPlayerColor()))
+      ct:AddText(winner:Nick(), self:FormatColor(winner:GetPlayerColor()))
       ct:AddText(" won and recieved an additional $" .. cash .. "!")
       ct:SendAll()
     end
@@ -106,35 +124,38 @@ function GM:DeclareWinner(case, ply)
 end
 
 local pNextBonus = 0
+--- Issues a participation bonus to all living players. Only works during the fighting phase.
+-- Has a five second cooldown before it can be invoked with effect again.
 function GM:ParticipationBonus()
-  if self:GetGameState() == 3 and pNextBonus <= CurTime() then
-    for _, v in pairs(self:GetActivePlayers()) do
+  if self:GetGameState() == FLOOD_GS_FIGHT and pNextBonus <= CurTime() then
+    for _, ply in pairs(self:GetActivePlayers()) do
       local cash = GetConVar("flood_participation_cash"):GetInt()
-      v:AddCash(cash)
+      ply:AddCash(cash)
     end
 
     pNextBonus = CurTime() + 5
   end
 end
 
+--- Deletes all props and refunds their owner for each prop's cost.
 function GM:RefundAllProps()
-  for k, v in pairs(ents.GetAll()) do
-    if v:GetClass() == "prop_physics" then
-      if v:CPPIGetOwner() ~= nil and v:CPPIGetOwner() ~= NULL and v:CPPIGetOwner() ~= "" then
-	local Currenthealth = tonumber(v:GetNWInt("CurrentPropHealth"))
-	local Basehealth = tonumber(v:GetNWInt("BasePropHealth"))
-	local Currentcash = tonumber(v:CPPIGetOwner():GetNWInt("flood_cash"))
-	local Recieve = (Currenthealth / Basehealth) * Basehealth
-	if Recieve > 0 then
-	  v:Remove()
-	  if v:CPPIGetOwner():IsValid() then
-	    v:CPPIGetOwner():AddCash(Recieve)
+  for _, ent in pairs(ents.GetAll()) do
+    if ent:GetClass() == "prop_physics" then
+      if ent:CPPIGetOwner() ~= nil and ent:CPPIGetOwner() ~= NULL and ent:CPPIGetOwner() ~= "" then
+	local currentHealth = tonumber(ent:GetNWInt("CurrentPropHealth"))
+	local baseHealth = tonumber(ent:GetNWInt("BasePropHealth"))
+	local currentCash = tonumber(ent:CPPIGetOwner():GetNWInt("flood_cash"))
+	local receive = (currentHealth / baseHealth) * baseHealth
+	if receive > 0 then
+	  ent:Remove()
+	  if ent:CPPIGetOwner():IsValid() then
+	    ent:CPPIGetOwner():AddCash(receive)
 	  end
 	else
-	  v:Remove()
+	  ent:Remove()
 	end
       else
-	v:Remove()
+	ent:Remove()
       end
     end
   end

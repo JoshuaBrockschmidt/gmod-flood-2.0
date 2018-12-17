@@ -15,13 +15,13 @@ end
 timer.Create(
   "Flood:OffProps", 1, 0,
   function()
-    if GAMEMODE:GetGameState() == 2 or GAMEMODE:GetGameState() == 3 then
-      for _, v in pairs(player.GetAll()) do
-	local ent = v:GetGroundEntity()
+    if GAMEMODE:GetGameState() == FLOOD_GS_FLOOD or GAMEMODE:GetGameState() == FLOOD_GS_FIGHT then
+      for _, ply in pairs(player.GetAll()) do
+	local ent = ply:GetGroundEntity()
 	if ent and IsValid(ent) and ent:GetClass() == "prop_physics" and
-	  ent:CPPIGetOwner() != v and PlayerIsFriend(ent:CPPIGetOwner(), v) == false
+	  ent:CPPIGetOwner() ~= ply and PlayerIsFriend(ent:CPPIGetOwner(), ply) == false
 	then
-	  v:SetVelocity(Vector(math.random(1, 5000), math.random(1, 5000), math.random(1, 5000)))
+	  ply:SetVelocity(Vector(math.random(1, 5000), math.random(1, 5000), math.random(1, 5000)))
 	end
       end
     end

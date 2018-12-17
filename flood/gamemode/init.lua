@@ -30,8 +30,10 @@ end
 -- Timer ConVars
 CreateConVar("flood_build_time", 240, FCVAR_NOTIFY,
 	     "Time allowed for building (def: 240)")
-CreateConVar("flood_flood_time", 25, FCVAR_NOTIFY,
-	     "Time between build phase and fight phase (def: 25)")
+CreateConVar("flood_board_time", 20, FCVAR_NOTIFY,
+	     "Time between build phase and flood phase (def: 20)")
+CreateConVar("flood_flood_time", 10, FCVAR_NOTIFY,
+	     "Time between board phase and fight phase (def: 10)")
 CreateConVar("flood_fight_time", 300, FCVAR_NOTIFY,
 	     "Time allowed for fighting (def: 300)")
 CreateConVar("flood_reset_time", 10, FCVAR_NOTIFY,
@@ -45,7 +47,7 @@ CreateConVar("flood_bonus_cash", 2000, FCVAR_NOTIFY,
 
 -- Water Hurt System
 CreateConVar("flood_wh_enabled", 1, FCVAR_NOTIFY,
-	     "Does the water hurt players - 1=true 2=false (def: 1)") -- TODO: Make 0=false
+	     "Does the water hurt players - 1=true 0=false (def: 1)")
 CreateConVar("flood_wh_damage", 2, FCVAR_NOTIFY,
 	     "How much damage a player takes per cycle (def: 2)")
 
@@ -86,14 +88,13 @@ function GM:Think()
   end
 end
 
-function GM:CleanupMap()
-  -- Refund what we can
+function GM:CleanUpMap()
+  -- Refund what we can.
   self:RefundAllProps()
 
-  -- Cleanup the rest
+  -- Clean up the rest.
   game.CleanUpMap()
 
-  -- Call InitPostEntity
   self:InitPostEntity()
 end
 
@@ -102,20 +103,21 @@ function GM:ShowHelp(ply)
 end
 
 function GM:EntityTakeDamage(ent, dmginfo)
-  local attacker = dmginfo:GetAttacker()
-  if GAMEMODE:GetGameState() ~= 2 and GAMEMODE:GetGameState() ~= 3 then
-    return false
-  else
+  -- Apply damage if it is fighting phase.
+  if GAMEMODE:GetGameState() == FLOOD_GS_FIGHT then
+    local attacker = dmginfo:GetAttacker()
     if not ent:IsPlayer() then
       if attacker:IsPlayer() then
 	if attacker:GetActiveWeapon() ~= NULL then
+	  -- TODO: Why do we need a special case for the pistol?
 	  if attacker:GetActiveWeapon():GetClass() == "weapon_pistol" then
 	    ent:SetNWInt("CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - 1)
 	  else
 	    for _, Weapon in pairs(Weapons) do
 	      if attacker:GetActiveWeapon():GetClass() == Weapon.Class then
-		ent:SetNWInt("CurrentPropHealth",
-			     ent:GetNWInt("CurrentPropHealth") - tonumber(Weapon.Damage))
+		ent:SetNWInt(
+		  "CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - tonumber(Weapon.Damage)
+		)
 	      end
 	    end
 	  end
@@ -132,11 +134,14 @@ function GM:EntityTakeDamage(ent, dmginfo)
 	ent:Remove()
       end
     end
+  else
+    return false
   end
 end
 
 function ShouldTakeDamage(victim, attacker)
-  if GAMEMODE:GetGameState() ~= 3 then
+  -- Only take damage during the fighting phase.
+  if GAMEMODE:GetGameState() ~= FLOOD_GS_FIGHT then
     return false
   else
     if attacker:IsPlayer() and victim:IsPlayer() then
@@ -148,10 +153,10 @@ function ShouldTakeDamage(victim, attacker)
     end
   end
 end
-hook.Add("PlayerShouldTakeDamage", "Flood_PlayerShouldTakeDamge", ShouldTakeDamage)
+hook.Add("PlayerShouldTakeDamage", "Flood_PlayerShouldTakeDamage", ShouldTakeDamage)
 
 function GM:KeyPress(ply, key)
-  if ply:Alive() ~= true then
+  if not ply:Alive() then
     if key == IN_ATTACK then
       ply:CycleSpectator(1)
     end
