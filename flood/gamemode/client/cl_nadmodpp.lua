@@ -3,24 +3,24 @@
 -- By Nebual@nebtown.info 2012
 -- Menus designed after SpaceTech's Simple Prop Protection
 -- =================================
-if !NADMOD then 
+if not NADMOD then
   NADMOD = {}
   NADMOD.PropOwners = {}
   NADMOD.PPConfig = {}
   NADMOD.Friends = {}
 end
 
-local Props = NADMOD.PropOwners
+local PropOwners = NADMOD.PropOwners
 net.Receive(
   "nadmod_propowners",
   function(len)
     local num = net.ReadUInt(16)
-    for k=1,num do
+    for k = 1, num do
       local id,str = net.ReadUInt(16), net.ReadString()
-      if str == "-" then Props[id] = nil
-      elseif str == "W" then Props[id] = "World"
-      elseif str == "O" then Props[id] = "Ownerless"
-      else Props[id] = str
+      if str == "-" then PropOwners[id] = nil
+      elseif str == "W" then PropOwners[id] = "World"
+      elseif str == "O" then PropOwners[id] = "Ownerless"
+      else PropOwners[id] = str
       end
     end
   end
@@ -31,12 +31,13 @@ hook.Add(
   "HUDPaint", "NADMOD.HUDPaint",
   function()
     local tr = LocalPlayer():GetEyeTrace()
-    if !tr.HitNonWorld then
+    if not tr.HitNonWorld then
       return
     end
     local ent = tr.Entity
-    if ent:IsValid() && !ent:IsPlayer() then
-      local text = "Owner: " .. (Props[ent:EntIndex()] or "N/A")
+    -- Only show information for entities that are props owned by a player.
+    if ent:IsValid() and not ent:IsPlayer() and PropOwners[ent:EntIndex()] then
+      local text = "Owner: " .. PropOwners[ent:EntIndex()]
       local text2 = "'" .. string.sub(table.remove(string.Explode("/", ent:GetModel())), 1, -5) ..
 	"' [" .. ent:EntIndex() .. "]"
       local text3 = ent:GetClass()
@@ -108,7 +109,7 @@ concommand.Add(
 )
 
 function NADMOD.AdminPanel(Panel, runByNetReceive)
-  if Panel and !NADMOD.AdminCPanel then
+  if Panel and not NADMOD.AdminCPanel then
     NADMOD.AdminCPanel = Panel
   end
   if not runByNetReceive then
@@ -195,7 +196,7 @@ concommand.Add(
 function NADMOD.ClientPanel(Panel)
   RunConsoleCommand("npp_refreshfriends")
   Panel:ClearControls()
-  if !NADMOD.ClientCPanel then
+  if not NADMOD.ClientCPanel then
     NADMOD.ClientCPanel = Panel
   end
   Panel:SetName("NADMOD - Client Panel")
