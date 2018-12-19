@@ -29,12 +29,15 @@ function GM:GetActivePlayers()
   return players
 end
 
---- Checks if there is a winner. Only works during the fighting phase.
+--- Checks if there are any winners. Declares a winner and ends the game if either one player is
+-- left, only a single team of players remains, or all players are dead. Only works during the
+-- fighting phase.
 function GM:CheckForWinner()
   -- If it is the fighing phase, check for a winner.
   if self:GetGameState() == FLOOD_GS_FIGHT then
     local players = self:GetActivePlayers()
     local count = #players
+    local winner = nil
     if count == 1 then
       winner = players[1]
     end
