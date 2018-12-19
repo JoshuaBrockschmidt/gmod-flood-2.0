@@ -4,7 +4,7 @@ GM.ConstructionTools = GAMEMODE and GM.ConstructionTools or {}
 -- Tables are {"internal toolname", DonatorOnly bool, Enabled? bool},
 GM.ConstraintTools = {
   {"rope", false, true},
-  {"weld", false, true} -- TODO: Replace with smart weld
+  {"smartweld", false, true}
 }
 
 -- TODO: Replace these with tools compatible with the monetary system in use
@@ -12,7 +12,8 @@ GM.ConstraintTools = {
 GM.ConstructionTools = {
   {"balloon", false, true},
   {"duplicator", false, true},
-  {"thruster", false, true}
+  {"thruster", false, true},
+  {"stacker_improved", false, true}
 }
 
 function GM:CompileToolTable()
