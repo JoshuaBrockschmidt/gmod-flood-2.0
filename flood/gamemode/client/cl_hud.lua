@@ -64,7 +64,7 @@ local bHeight = Spacer + ySize + Spacer
 net.Receive(
   "RoundState",
   function(len)
-    GameState = net.ReadFloat()
+    GameState = net.ReadUInt(3)
     BuildTimer = net.ReadFloat()
     BoardTimer = net.ReadFloat()
     FloodTimer = net.ReadFloat()
@@ -86,15 +86,13 @@ function GM:HUDPaint()
     boxY0 = y * 0.005
     textY0 = boxY0 + Spacer
     if GameState == FLOOD_GS_WAIT then
-      -- We subtract 1 from the x coordinate and width to align with the other boxes.
       draw.RoundedBoxEx(
-	6, xPos - 1, boxY0, boxW - 1,  x * 0.018, active_color, true, true, false, false
+	6, xPos, boxY0, boxW,  x * 0.018, active_color, true, true, false, false
       )
       draw.SimpleText("Waiting for players...", "Flood_HUD", labelX, textY0, color_white, 0, 0)
     else
-      -- We subtract 1 from the x coordinate and width to align with the other boxes.
       draw.RoundedBoxEx(
-	6, xPos - 1, boxY0, boxW - 1,  x * 0.018, color_grey, true, true, false, false
+	6, xPos, boxY0, boxW,  x * 0.018, color_grey, true, true, false, false
       )
       draw.SimpleText("Waiting for players...", "Flood_HUD", labelX, textY0, color_grey, 0, 0)
     end
@@ -157,14 +155,14 @@ function GM:HUDPaint()
     if GameState == FLOOD_GS_RESET then
       -- We subtract 1 from the x coordinate and width to align with the other boxes.
       draw.RoundedBoxEx(
-	6, xPos - 1, boxY5, boxW - 1,  x * 0.018, active_color, false, false, true, true
+	6, xPos, boxY5, boxW,  x * 0.018, active_color, false, false, true, true
       )
       draw.SimpleText("Restarting the round.", "Flood_HUD", labelX, textY5, color_white, 0, 0)
       draw.SimpleText(ResetTimer, "Flood_HUD", timerX, textY5, color_white, 0, 0)
     else
       -- We subtract 1 from the x coordinate and width to align with the other boxes.
       draw.RoundedBoxEx(
-	6, xPos - 1, boxY5, boxW - 1,  x * 0.018, color_grey, false, false, true, true
+	6, xPos, boxY5, boxW,  x * 0.018, color_grey, false, false, true, true
       )
       draw.SimpleText("Restarting the round.", "Flood_HUD", labelX, textY5, color_grey, 0, 0)
       draw.SimpleText(ResetTimer, "Flood_HUD", timerX, textY5, color_grey, 0, 0)
@@ -196,7 +194,7 @@ function GM:HUDPaint()
 		    x * 0.5, y * 0.5 - 60, color_white, 1, 1)
   end
 
-  -- Bottom left HUD stuff.
+  -- Bottom left HUD.
   if LocalPlayer():Alive() and IsValid(LocalPlayer()) then
     draw.RoundedBox(
       6, 4, y - ySize - Spacer - (bHeight * 2), bWidth, bHeight * 2 + ySize, Color(24, 24, 24, 255)

@@ -63,7 +63,7 @@ function GM:TimerController()
 
     local gState = self:GetGameState()
     net.Start("RoundState")
-    net.WriteFloat(gState)
+    net.WriteUInt(gState, 3)
     net.WriteFloat(Flood_buildTime)
     net.WriteFloat(Flood_boardTime)
     net.WriteFloat(Flood_floodTime)
