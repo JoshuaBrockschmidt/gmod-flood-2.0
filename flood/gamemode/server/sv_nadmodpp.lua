@@ -36,6 +36,7 @@ if not NADMOD then
 	return ply
       end
     end
+
     -- If the above two exact searches fail, try doing a partial search
     for _, ply in pairs(player.GetAll()) do
       if string.find(string.lower(ply:Nick()), nick) then
@@ -154,34 +155,33 @@ function NADMOD.IsFriendProp(ply, ent)
 end
 
 function NADMOD.PlayerCanTouch(ply, ent)
-  -- If PP is off or the ent is worldspawn, let them touch it
-  if not tobool(NADMOD.PPConfig["toggle"]) or ent:IsWorld() then
+  -- Don't allow player to touch world props.
+  if ent:IsWorld() then
+    return false
+  end
+
+  -- If prop protection is off let the player touch it.
+  if not tobool(NADMOD.PPConfig["toggle"]) then
     return true
   elseif not IsValid(ent) or not IsValid(ply) or ent:IsPlayer() or not ply:IsPlayer() then
     return false
   end
 
+  -- Claim ownerless props for the world.
   if not NADMOD.Props[ent:EntIndex()] then
-    local class = ent:GetClass()
-    if string.find(class, "stone_") == 1 or string.find(class, "rock_") == 1 or
-      string.find(class, "stargate_") == 0 or string.find(class, "dhd_") == 0 or
-      class == "flag" or class == "item"
-    then
-      NADMOD.SetOwnerWorld(ent)
-    else
-      NADMOD.PlayerMakePropOwner(ply, ent)
-      NADMOD.Notify(ply, "You now own this prop")
-      return true
-    end
+    NADMOD.SetOwnerWorld(ent)
   end
-  -- Ownerless props can be touched by all
+
+  -- Ownerless props cannot be touched.
   if NADMOD.Props[ent:EntIndex()].Name == "O" then
-    return true
+    return false
   end
-  -- Admins can touch anyones props + world
+
+  -- Admins can touch anyone's props.
   if NADMOD.PPConfig["adminall"] and NADMOD.IsPPAdmin(ply) then
     return true
   end
+
   -- Players can touch their own props and friends
   if NADMOD.Props[ent:EntIndex()].SteamID == ply:SteamID() or NADMOD.IsFriendProp(ply, ent) then
     return true
