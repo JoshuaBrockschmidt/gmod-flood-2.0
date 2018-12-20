@@ -3,6 +3,8 @@ Props = {}
 WeaponCategories = {}
 Weapons = {}
 
+local INCLUDE_CSGO_PROPS = true
+
 --- Adds a prop to the prop list.
 -- @param prop Table describing prop.
 local function addProp(prop)
@@ -15,233 +17,291 @@ local function addWeapon(weapon)
   table.insert(Weapons, weapon)
 end
 
+local FLOAT_PROPS = 1
+local ARMOR_PROPS = 2
+local DONATOR_PROPS = 3
 
--- Add all prop categories.
-PropCategories[1] = "Bouyant Props"
-PropCategories[2] = "Armor Props"
+
+-- Prop categories.
+PropCategories[FLOAT_PROPS] = "Bouyant Props"
+PropCategories[ARMOR_PROPS] = "Armor Props"
+PropCategories[DONATOR_PROPS] = "Donator Props"
 
 
--- Add all weapon categories.
+-- Weapon categories.
 WeaponCategories[1] = "Basic Weapons"
 
 
--- Add all props.
+-- Bouyant props.
 addProp({
-    Description = "Wooden Table",
-    Model = "models/props_c17/FurnitureTable002a.mdl",
-    Group = 1,
+    Description = "Blue Barrel",
+    Model = "models/props_borealis/bluebarrel001.mdl",
+    Group = FLOAT_PROPS,
     Price = 50,
-    Health = 25,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Wooden Bench",
-    Model = "models/props_c17/bench01a.mdl",
-    Group = 1,
-    Price = 40,
-    Health = 20,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Wooden Shelf 1",
-    Model = "models/props_c17/shelfunit01a.mdl",
-    Group = 1,
-    Price = 180,
-    Health = 90,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Wooden Shelf 2",
-    Model = "models/props_c17/FurnitureShelf001a.mdl",
-    Group = 1,
-    Price = 200,
     Health = 100,
     DonatorOnly = false
 })
 addProp({
-    Description = "Wooden Shelf 3",
-    Model = "models/props_interiors/Furniture_shelf01a.mdl",
-    Group = 1,
-    Price = 450,
-    Health = 225,
+    Description = "Curved Wooden Platform",
+    Model = "models/props_phx/construct/wood/wood_curve90x2.mdl",
+    Group = FLOAT_PROPS,
+    Price = 70,
+    Health = 140,
     DonatorOnly = false
 })
 addProp({
-    Description = "Metal Door",
-    Model = "models/props_doors/door03_slotted_left.mdl",
-    Group = 1,
-    Price = 250,
-    Health = 125,
+    Description = "Wooden Platform",
+    Model = "models/props_phx/construct/wood/wood_panel2x2.mdl",
+    Group = FLOAT_PROPS,
+    Price = 75,
+    Health = 150,
     DonatorOnly = false
 })
 addProp({
-    Description = "Dock Pole 1",
+    Description = "Half Wooden Circle",
+    Model = "models/props_phx/construct/wood/wood_angle180.mdl",
+    Group = FLOAT_PROPS,
+    Price = 35,
+    Health = 70,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Wooden Circle",
+    Model = "models/props_phx/construct/wood/wood_angle360.mdl",
+    Group = FLOAT_PROPS,
+    Price = 70,
+    Health = 140,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Shelf",
+    Model = "models/props_c17/furnitureshelf001a.mdl",
+    Group = FLOAT_PROPS,
+    Price = 120,
+    Health = 400,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Short Dock Pole",
     Model = "models/props_docks/dock01_pole01a_128.mdl",
-    Group = 1,
-    Price = 200,
-    Health = 100,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Dock Pole 2",
-    Model = "models/props_docks/dock03_pole01a_256.mdl",
-    Group = 1,
-    Price = 400,
-    Health = 200,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Wooden Desk",
-    Model = "models/props_interiors/Furniture_Desk01a.mdl",
-    Group = 1,
-    Price = 160,
-    Health = 80,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Vending Machine",
-    Model = "models/props_interiors/VendingMachineSoda01a.mdl",
-    Group = 1,
-    Price = 1200,
-    Health = 600,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Vending Machine Door",
-    Model = "models/props_interiors/VendingMachineSoda01a_door.mdl",
-    Group = 1,
-    Price = 600,
+    Group = FLOAT_PROPS,
+    Price = 100,
     Health = 300,
     DonatorOnly = false
 })
 addProp({
-    Description = "Blue Barrel",
-    Model = "models/props_borealis/bluebarrel001.mdl",
-    Group = 1,
-    Price = 50,
-    Health = 25,
+    Description = "Dock Pole",
+    Model = "models/props_docks/dock03_pole01a_256.mdl",
+    Group = FLOAT_PROPS,
+    Price = 120,
+    Health = 360,
     DonatorOnly = false
 })
 addProp({
-    Description = "Gravestone",
-    Model = "models/props_c17/gravestone003a.mdl",
-    Group = 2,
-    Price = 160,
-    Health = 80,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Oil Drum",
-    Model = "models/props_c17/oildrum001.mdl",
-    Group = 2,
-    Price = 60,
-    Health = 30,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Concrete Barrier",
-    Model = "models/props_c17/concrete_barrier001a.mdl",
-    Group = 2,
+    Description = "Vending Machine Door",
+    Model = "models/props_interiors/vendingmachinesoda01a_door.mdl",
+    Group = FLOAT_PROPS,
     Price = 150,
-    Health = 75,
+    Health = 400,
     DonatorOnly = false
 })
 addProp({
-    Description = "Coffin Piece",
-    Model = "models/props_c17/gravestone_coffinpiece002a.mdl",
-    Group = 2,
-    Price = 160,
-    Health = 80,
+    Description = "Vending Machine",
+    Model = "models/props_interiors/vendingmachinesoda01a.mdl",
+    Group = FLOAT_PROPS,
+    Price = 300,
+    Health = 800,
     DonatorOnly = false
 })
+
+
+-- Armor props.
 addProp({
-    Description = "Display Case",
-    Model = "models/props_c17/display_cooler01a.mdl",
-    Group = 2,
-    Price = 260,
-    Health = 130,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Red Couch",
-    Model = "models/props_c17/FurnitureCouch001a.mdl",
-    Group = 2,
-    Price = 400,
+    Description = "Metal Bars",
+    Model = "models/props_building_details/storefront_template001a_bars.mdl",
+    Group = ARMOR_PROPS,
+    Price = 30,
     Health = 200,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Metal Locker",
-    Model = "models/props_c17/Lockers001a.mdl",
-    Group = 2,
-    Price = 700,
-    Health = 350,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Metal Panel",
-    Model = "models/props_debris/metal_panel01a.mdl",
-    Group = 2,
-    Price = 200,
-    Health = 100,
     DonatorOnly = false
 })
 addProp({
     Description = "Small Metal Panel",
     Model = "models/props_debris/metal_panel02a.mdl",
-    Group = 2,
-    Price = 100,
-    Health = 50,
+    Group = ARMOR_PROPS,
+    Price = 30,
+    Health = 200,
     DonatorOnly = false
 })
 addProp({
-    Description = "Gas Canister",
-    Model = "models/props_c17/canister01a.mdl",
-    Group = 2,
-    Price = 100,
-    Health = 50,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Large Gas Canister",
-    Model = "models/props_c17/canister_propane01a.mdl",
-    Group = 2,
-    Price = 150,
-    Health = 75,
-    DonatorOnly = false
-})
-addProp({
-    Description = "Bathtub",
-    Model = "models/props_interiors/BathTub01a.mdl",
-    Group = 2,
-    Price = 800,
+    Description = "Large Metal Panel",
+    Model = "models/props_debris/metal_panel01a.mdl",
+    Group = ARMOR_PROPS,
+    Price = 50,
     Health = 400,
     DonatorOnly = false
 })
 addProp({
-    Description = "Refrigerator",
-    Model = "models/props_interiors/refrigerator01a.mdl",
-    Group = 2,
-    Price = 600,
+    Description = "Rack",
+    Model = "models/props_trainstation/traincar_rack001.mdl",
+    Group = ARMOR_PROPS,
+    Price = 50,
+    Health = 400,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Metal Door",
+    Model = "models/props_borealis/borealis_door001a.mdl",
+    Group = ARMOR_PROPS,
+    Price = 60,
+    Health = 500,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Dumpster Lid",
+    Model = "models/props_junk/trashdumpster02b.mdl",
+    Group = ARMOR_PROPS,
+    Price = 60,
+    Health = 600,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Blast Door",
+    Model = "models/props_lab/blastdoor001b.mdl",
+    Group = ARMOR_PROPS,
+    Price = 150,
+    Health = 1250,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Double Blast Door",
+    Model = "models/props_lab/blastdoor001c.mdl",
+    Group = ARMOR_PROPS,
+    Price = 300,
+    Health = 2500,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Radiator",
+    Model = "models/props_c17/furnitureradiator001a.mdl",
+    Group = ARMOR_PROPS,
+    Price = 30,
+    Health = 250,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Metal Arch",
+    Model = "models/props_trainstation/trainstation_arch001.mdl",
+    Group = ARMOR_PROPS,
+    Price = 40,
+    Health = 250,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Bathtub",
+    Model = "models/props_c17/furniturebathtub001a.mdl",
+    Group = ARMOR_PROPS,
+    Price = 45,
     Health = 300,
     DonatorOnly = false
 })
 addProp({
-    Description = "Refrigerator Door",
-    Model = "models/props_interiors/refrigeratorDoor01a.mdl",
-    Group = 2,
-    Price = 300,
-    Health = 150,
+    Description = "Push Cart",
+    Model = "models/props_junk/pushcart01a.mdl",
+    Group = ARMOR_PROPS,
+    Price = 60,
+    Health = 500,
     DonatorOnly = false
 })
 addProp({
-    Description = "Metal Bars",
-    Model = "models/props_building_details/Storefront_Template001a_Bars.mdl",
-    Group = 2,
-    Price = 220,
-    Health = 110,
+    Description = "Lockers",
+    Model = "models/props_c17/lockers001a.mdl",
+    Group = ARMOR_PROPS,
+    Price = 75,
+    Health = 700,
     DonatorOnly = false
 })
+addProp({
+    Description = "Concrete Barrier",
+    Model = "models/props_c17/concrete_barrier001a.mdl",
+    Group = ARMOR_PROPS,
+    Price = 75,
+    Health = 700,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Coffin Piece",
+    Model = "models/props_c17/gravestone_coffinpiece001a.mdl",
+    Group = ARMOR_PROPS,
+    Price = 85,
+    Health = 750,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Washing Machine",
+    Model = "models/props_c17/furniturewashingmachine001a.mdl",
+    Group = ARMOR_PROPS,
+    Price = 50,
+    Health = 500,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Stove",
+    Model = "models/props_c17/furniturestove001a.mdl",
+    Group = ARMOR_PROPS,
+    Price = 100,
+    Health = 1000,
+    DonatorOnly = false
+})
+addProp({
+    Description = "Combine Barrier",
+    Model = "models/props_combine/combine_barricade_short02a.mdl",
+    Group = ARMOR_PROPS,
+    Price = 250,
+    Health = 2000,
+    DonatorOnly = false
+})
+
+
+-- CS:GO props.
+if INCLUDE_CSGO_PROPS then
+  -- Bouyant props.
+  addProp({
+      Description = "Couch",
+      Model = "models/props/cs_militia/couch.mdl",
+      Group = FLOAT_PROPS,
+      Price = 500,
+      Health = 1000,
+      DonatorOnly = false
+  })
+  addProp({
+      Description = "Fence Door",
+      Model = "models/props/cs_militia/housefence_door.mdl",
+      Group = FLOAT_PROPS,
+      Price = 100,
+      Health = 300,
+      DonatorOnly = false
+  })
+
+  -- Armor props.
+  addProp({
+      Description = "Window",
+      Model = "models/props/cs_militia/militiawindow01.mdl",
+      Group = ARMOR_PROPS,
+      Price = 30,
+      Health = 250,
+      DonatorOnly = false
+  })
+
+  -- Donator props.
+  addProp({
+      Description = "Pallet of Money",
+      Model = "models/props/cs_assault/moneypallet.mdl",
+      Group = DONATOR_PROPS,
+      Price = 600,
+      Health = 2000,
+      DonatorOnly = true
+  })
+end
 
 
 -- Add all weapons.
