@@ -87,7 +87,7 @@ function GM:PlayerDeath(ply, inflictor, attacker)
     (inflictor:IsPlayer() or inflictor:IsNPC())
   then
     inflictor = inflictor:GetActiveWeapon()
-    if !IsValid(inflictor) then
+    if not IsValid(inflictor) then
       inflictor = attacker
     end
   end
@@ -104,7 +104,7 @@ function GM:PlayerDeath(ply, inflictor, attacker)
     attacker = attacker:GetDriver()
   end
 
-  if !IsValid(inflictor) and IsValid(attacker) then
+  if not IsValid(inflictor) and IsValid(attacker) then
     inflictor = attacker
   end
 
@@ -115,7 +115,7 @@ function GM:PlayerDeath(ply, inflictor, attacker)
     and (inflictor:IsPlayer() or inflictor:IsNPC())
   then
     inflictor = inflictor:GetActiveWeapon()
-    if (!IsValid(inflictor)) then
+    if (not IsValid(inflictor)) then
       inflictor = attacker
     end
   end

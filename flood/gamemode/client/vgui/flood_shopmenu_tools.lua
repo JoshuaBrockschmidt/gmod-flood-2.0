@@ -93,7 +93,7 @@ function PANEL:CreateCP(button)
   self.LastSelected = button
 
   local cp = controlpanel.Get(button.Name)
-  if !cp:GetInitialized() then
+  if not cp:GetInitialized() then
     cp:FillViaTable(button)
   end
 

@@ -209,7 +209,7 @@ hook.Add("PlayerSay", "Flood_SetTime", Flood_SetTime)
 function FindPlayer(ply, target)
   name = string.lower(target)
   for _, ply in ipairs(player.GetHumans()) do
-    if(string.find(string.lower(ply:Name()), name, 1, true) != nil) then
+    if(string.find(string.lower(ply:Name()), name, 1, true) ~= nil) then
       return ply
     end
   end

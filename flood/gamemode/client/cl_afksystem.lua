@@ -39,11 +39,11 @@ function CheckAFK()
       afkTimer = 30
     end
 
-    if LocalPlayer():GetAngles() != afkInfo.ang then
+    if LocalPlayer():GetAngles() ~= afkInfo.ang then
       afkInfo.ang = LocalPlayer():GetAngles()
       afkInfo.t = CurTime()
 
-    elseif gui.MouseX() != afkInfo.mx or gui.MouseY() != afkInfo.my then
+    elseif gui.MouseX() ~= afkInfo.mx or gui.MouseY() ~= afkInfo.my then
       afkInfo.mx = gui.MouseX()
       afkInfo.my = gui.MouseY()
       afkInfo.t = CurTime()

@@ -63,11 +63,11 @@ function GM:CheckForWinner()
 
     -- Determine if there are any winners.
     doReset = false
-    if allAreFriends == true and count != 0 then
+    if allAreFriends == true and count ~= 0 then
       -- A group of players won.
       self:DeclareWinner(0, players)
       doReset = true
-    elseif count == 1 and winner != nil then
+    elseif count == 1 and winner ~= nil then
       -- A single player won..
       self:DeclareWinner(1, winner)
       doReset = true

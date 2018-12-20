@@ -50,15 +50,15 @@ function PANEL:AddText(txt, color)
   lbl:SetText(txt)
 
   -- localised ent death
-  if string.Left(txt, 1) == "#" && !color then
+  if string.Left(txt, 1) == "#" and not color then
     color = GAMEMODE.DeathNoticeDefaultColor
   end
 
-  if GAMEMODE.DeathNoticeTextColor && !color then
+  if GAMEMODE.DeathNoticeTextColor and not color then
     color = GAMEMODE.DeathNoticeTextColor
   end
 
-  if !color then
+  if not color then
     color = color_white
   end
 

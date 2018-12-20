@@ -143,11 +143,11 @@ end
 timer.Create("NADMOD.RefreshOwners", 1, 0, NADMOD.RefreshOwners)
 
 function NADMOD.IsFriendProp(ply, ent)
-  if IsValid(ent) && IsValid(ply) && ply:IsPlayer() && NADMOD.Props[ent:EntIndex()] then
+  if IsValid(ent) and IsValid(ply) and ply:IsPlayer() and NADMOD.Props[ent:EntIndex()] then
     local ownerSteamID = NADMOD.Props[ent:EntIndex()].SteamID
     if NADMOD.Users[ownerSteamID] then
       local friends = NADMOD.Users[ownerSteamID].Friends
-      return friends && friends[ply:SteamID()]
+      return friends and friends[ply:SteamID()]
     end
   end
   return false
@@ -157,7 +157,7 @@ function NADMOD.PlayerCanTouch(ply, ent)
   -- If PP is off or the ent is worldspawn, let them touch it
   if not tobool(NADMOD.PPConfig["toggle"]) or ent:IsWorld() then
     return true
-  elseif !IsValid(ent) or !IsValid(ply) or ent:IsPlayer() or !ply:IsPlayer() then
+  elseif not IsValid(ent) or not IsValid(ply) or ent:IsPlayer() or not ply:IsPlayer() then
     return false
   end
 
@@ -192,9 +192,9 @@ end
 
 -- We could hook directly to PlayerCanTouch, but returning true stops other hooks from being called
 function NADMOD.PlayerCanTouchSafe(ply, ent)
-  if !IsValid(ent) or ent:IsPlayer() then
+  if not IsValid(ent) or ent:IsPlayer() then
     return
-  elseif !NADMOD.PlayerCanTouch(ply,ent) then
+  elseif not NADMOD.PlayerCanTouch(ply,ent) then
     return false
   end
 end
@@ -204,9 +204,9 @@ hook.Add("CanEditVariable", "NADMOD.CanEditVariable", function(ent, ply, key, va
 
 function NADMOD.OnPhysgunReload(weapon, ply)
   local tr = util.TraceLine(util.GetPlayerTrace(ply))
-  if not tr.HitNonWorld or !tr.Entity:IsValid() or tr.Entity:IsPlayer() then
+  if not tr.HitNonWorld or not tr.Entity:IsValid() or tr.Entity:IsPlayer() then
     return
-  elseif !NADMOD.PlayerCanTouch(ply, tr.Entity) then
+  elseif not NADMOD.PlayerCanTouch(ply, tr.Entity) then
     return false
   end
 end
@@ -214,11 +214,11 @@ hook.Add("OnPhysgunReload", "NADMOD.OnPhysgunReload", NADMOD.OnPhysgunReload)
 
 -- Basically just PlayerCanTouchSafe, but world props are fine to gravgun
 function NADMOD.GravGunPickup(ply, ent)
-  if !IsValid(ent) or ent:IsPlayer() then
+  if not IsValid(ent) or ent:IsPlayer() then
     return
   elseif NADMOD.Props[ent:EntIndex()] and NADMOD.Props[ent:EntIndex()].Name == "W" then
     return
-  elseif !NADMOD.PlayerCanTouch(ply,ent) then
+  elseif not NADMOD.PlayerCanTouch(ply,ent) then
     return false
   end
 end
@@ -228,10 +228,10 @@ hook.Add("GravGunPickupAllowed", "NADMOD.GravGunPickupAllowed", NADMOD.GravGunPi
 NADMOD.PPWeirdTraces = {"wire_winch", "wire_hydraulic", "slider", "hydraulic", "winch", "muscle"}
 function NADMOD.CanTool(ply, tr, mode)
   local ent = tr.Entity
-  if !ent:IsWorld() and (!ent:IsValid() or ent:IsPlayer()) then
+  if not ent:IsWorld() and (not ent:IsValid() or ent:IsPlayer()) then
     return false
   end
-  if !NADMOD.PlayerCanTouch(ply, ent) then
+  if not NADMOD.PlayerCanTouch(ply, ent) then
     if not ((NADMOD.Props[ent:EntIndex()] or {}).Name == "W" and
 	(mode == "wire_debugger" or mode == "wire_adv"))
     then
@@ -243,8 +243,8 @@ function NADMOD.CanTool(ply, tr, mode)
     Trace.endpos = tr.HitPos + (ply:GetAimVector() * 16.0)
     Trace.filter = {ply, tr.Entity}
     local tr2 = util.TraceLine(Trace)
-    if tr2.Hit and IsValid(tr2.Entity) and !tr2.Entity:IsPlayer() then
-      if !NADMOD.PlayerCanTouch(ply, tr2.Entity) then
+    if tr2.Hit and IsValid(tr2.Entity) and not tr2.Entity:IsPlayer() then
+      if not NADMOD.PlayerCanTouch(ply, tr2.Entity) then
 	return false
       end
     end
@@ -254,8 +254,8 @@ function NADMOD.CanTool(ply, tr, mode)
     Trace.endpos = Trace.start + (tr.HitNormal * 16384)
     Trace.filter = {ply}
     local tr2 = util.TraceLine(Trace)
-    if tr2.Hit and IsValid(tr2.Entity) and !tr2.Entity:IsPlayer() then
-      if !NADMOD.PlayerCanTouch(ply, tr2.Entity) then
+    if tr2.Hit and IsValid(tr2.Entity) and not tr2.Entity:IsPlayer() then
+      if not NADMOD.PlayerCanTouch(ply, tr2.Entity) then
 	return false
       end
     end
@@ -272,7 +272,7 @@ end
 hook.Add("CanTool", "NADMOD.CanTool", NADMOD.CanTool)
 
 function NADMOD.PlayerUse(ply, ent)
-  if !NADMOD.PPConfig["use"] or NADMOD.PlayerCanTouch(ply, ent) or
+  if not NADMOD.PPConfig["use"] or NADMOD.PlayerCanTouch(ply, ent) or
     (ent:IsValid() and NADMOD.Props[ent:EntIndex()].Name == "W")
   then
     return
@@ -287,7 +287,7 @@ hook.Add("PlayerUse", "NADMOD.PlayerUse", NADMOD.PlayerUse)
 --==========================================================--
 
 function NADMOD.PlayerMakePropOwner(ply, ent)
-  if !IsValid(ent) or !IsValid(ply) or ent:IsPlayer() or !ply:IsPlayer() then
+  if not IsValid(ent) or not IsValid(ply) or ent:IsPlayer() or not ply:IsPlayer() then
     return
   end
   NADMOD.Props[ent:EntIndex()] = {
@@ -323,7 +323,7 @@ hook.Add("PlayerSpawnedVehicle", "NADMOD.PlayerSpawnedVehicle", NADMOD.PlayerMak
 hook.Add("PlayerSpawnedSWEP", "NADMOD.PlayerSpawnedSWEP", NADMOD.PlayerMakePropOwner)
 
 function metaent:CPPISetOwnerless(bool)
-  if !IsValid(self) or self:IsPlayer() then
+  if not IsValid(self) or self:IsPlayer() then
     return
   end
 
@@ -436,7 +436,7 @@ function NADMOD.CleanupProps(ply, cmd, args)
   if not EntIndex or EntIndex == "" then
     local count = NADMOD.CleanupPlayerProps(ply:SteamID())
     NADMOD.Notify(ply,"Your props have been cleaned up (" .. count .. ")")
-  elseif !ply:IsValid() or NADMOD.IsPPAdmin(ply) then
+  elseif not ply:IsValid() or NADMOD.IsPPAdmin(ply) then
     NADMOD.CleanPlayer(Entity(EntIndex))
   end
 end
@@ -480,7 +480,7 @@ function NADMOD.CDP(ply, cmd, args)
   for k, prop in pairs(NADMOD.Props) do
     if not prop.Ent:IsValid() then
       NADMOD.EntityRemoved(prop.Ent)
-    elseif not IsValid(prop.Owner) and (prop.Name != "O" and prop.Name != "W") then
+    elseif not IsValid(prop.Owner) and (prop.Name ~= "O" and prop.Name ~= "W") then
       prop.Ent:Remove()
       count = count + 1
     end
@@ -652,9 +652,9 @@ end
 
 function metaent:CPPIGetOwner() return self.Owner end
 function metaent:CPPISetOwner(ply) return NADMOD.PlayerMakePropOwner(ply, self) end
-function metaent:CPPICanTool(ply,mode) return NADMOD.CanTool(ply, {Entity = self}, mode) != false end
-function metaent:CPPICanPhysgun(ply) return NADMOD.PlayerCanTouchSafe(ply, self) != false end
-function metaent:CPPICanPickup(ply) return NADMOD.GravGunPickup(ply, self) != false end
-function metaent:CPPICanPunt(ply) return NADMOD.GravGunPickup(ply, self) != false end
+function metaent:CPPICanTool(ply,mode) return NADMOD.CanTool(ply, {Entity = self}, mode) ~= false end
+function metaent:CPPICanPhysgun(ply) return NADMOD.PlayerCanTouchSafe(ply, self) ~= false end
+function metaent:CPPICanPickup(ply) return NADMOD.GravGunPickup(ply, self) ~= false end
+function metaent:CPPICanPunt(ply) return NADMOD.GravGunPickup(ply, self) ~= false end
 
 print("[NADMOD PP - NADMOD Prop Protection Module v" .. NADMOD.PPVersion .. " Loaded]")

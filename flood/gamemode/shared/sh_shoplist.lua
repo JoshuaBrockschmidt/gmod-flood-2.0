@@ -288,7 +288,7 @@ if INCLUDE_CSGO_PROPS then
       Model = "models/props/cs_militia/militiawindow01.mdl",
       Group = ARMOR_PROPS,
       Price = 30,
-      Health = 250,
+      Health = 200,
       DonatorOnly = false
   })
 

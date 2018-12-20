@@ -150,7 +150,7 @@ function NADMOD.AdminPanel(Panel, runByNetReceive)
   end
   local dccount = 0
   for k, v in pairs(counts) do
-    if k != "World" and k != "Ownerless" then
+    if k ~= "World" and k ~= "Ownerless" then
       dccount = dccount + v
     end
   end
@@ -214,7 +214,7 @@ function NADMOD.ClientPanel(Panel)
     Panel:Help("No Other Players Are Online")
   else
     for _, tar in pairs(Players) do
-      if(IsValid(tar) and tar != LocalPlayer()) then
+      if IsValid(tar) and tar ~= LocalPlayer() then
 	Panel:CheckBox(tar:Nick(), "npp_friend_"..tar:UniqueID())
       end
     end

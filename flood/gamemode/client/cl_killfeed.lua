@@ -15,7 +15,7 @@ local function RecvPlayerKilledByPlayer(length)
   local inflictor = net.ReadString()
   local attacker = net.ReadEntity()
 
-  if !IsValid(attacker) or !IsValid(victim) then
+  if not IsValid(attacker) or not IsValid(victim) then
     return
   end
 
@@ -26,7 +26,7 @@ net.Receive("PlayerKilledByPlayer", RecvPlayerKilledByPlayer)
 local function RecvPlayerKilledSelf(length)
   local victim 	= net.ReadEntity()
 
-  if !IsValid(victim) then
+  if not IsValid(victim) then
     return
   end
   GAMEMODE:AddPlayerAction(victim, GAMEMODE.SuicideString)
@@ -38,7 +38,7 @@ local function RecvPlayerKilled(length)
   local inflictor = net.ReadString()
   local attacker = "#" .. net.ReadString()
 
-  if !IsValid(victim) then
+  if not IsValid(victim) then
     return
   end
   GAMEMODE:AddDeathNotice(victim, inflictor, attacker)
@@ -50,7 +50,7 @@ local function RecvPlayerKilledNPC(length)
   local inflictor = net.ReadString()
   local attacker = net.ReadEntity()
 
-  if !IsValid(attacker) then
+  if not IsValid(attacker) then
     return
   end
   GAMEMODE:AddDeathNotice(victim, inflictor, attacker)
@@ -67,7 +67,7 @@ end
 net.Receive("NPCKilledNPC", RecvNPCKilledNPC)
 
 function GM:AddDeathNotice(victim, inflictor, attacker)
-  if !IsValid( g_DeathNotify) then
+  if not IsValid( g_DeathNotify) then
     return
   end
   local pnl = vgui.Create("GameNotice", g_DeathNotify)
@@ -79,9 +79,10 @@ function GM:AddDeathNotice(victim, inflictor, attacker)
 end
 
 function GM:AddPlayerAction(...)
-  if !IsValid(g_DeathNotify) then
+  if not IsValid(g_DeathNotify) then
     return
   end
+
   local pnl = vgui.Create("GameNotice", g_DeathNotify)
 
   for _, text in ipairs({...}) do
