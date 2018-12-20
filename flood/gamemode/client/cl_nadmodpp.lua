@@ -173,7 +173,7 @@ net.Receive(
   "nadmod_ppfriends",
   function(len)
     NADMOD.Friends = net.ReadTable()
-    for _,tar in pairs(player.GetAll()) do
+    for _, tar in pairs(player.GetAll()) do
       local isFriend = NADMOD.Friends[tar:SteamID()] and "1" or "0"
       CreateClientConVar("npp_friend_" .. tar:UniqueID(), isFriend, false, false)
       RunConsoleCommand("npp_friend_" .. tar:UniqueID(), isFriend)
@@ -184,7 +184,7 @@ net.Receive(
 concommand.Add(
   "npp_applyfriends",
   function(ply,cmd,args)
-    for _,tar in pairs(player.GetAll()) do
+    for _, tar in pairs(player.GetAll()) do
       NADMOD.Friends[tar:SteamID()] = GetConVar("npp_friend_" .. tar:UniqueID()):GetBool()
     end
     net.Start("nadmod_ppfriends")

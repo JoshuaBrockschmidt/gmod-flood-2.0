@@ -4,15 +4,15 @@ function MetaPlayer:CycleSpectator(a)
   if self:Alive() then Error("Can't spectate while alive!")
     return false
   end
-  if !self.SpecIDX then
+  if not self.SpecIDX then
     self.SpecIDX = 0
   end
 
   self.SpecIDX = self.SpecIDX + a
 
   local Players = {}
-  for _, v in pairs(GAMEMODE:GetActivePlayers()) do
-    Players[#Players + 1] = v
+  for _, ply in pairs(GAMEMODE:GetActivePlayers()) do
+    Players[#Players + 1] = ply
   end
 
   if self.SpecIDX < 1 then

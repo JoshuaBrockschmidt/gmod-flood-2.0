@@ -22,27 +22,29 @@ if not NADMOD then
     )
   end
   hook.Add("Shutdown", "NADMOD.Save", NADMOD.Save)
+
   function NADMOD.FindPlayer(nick)
     if not nick or nick == "" then
       return
     end
     nick = string.lower(nick)
     local num = tonumber(nick)
-    for _,v in pairs(player.GetAll()) do
-      if string.lower(v:Nick()) == nick then
-	return v
-      elseif v:UserID() == num then
-	return v
+    for _, ply in pairs(player.GetAll()) do
+      if string.lower(ply:Nick()) == nick then
+	return ply
+      elseif ply:UserID() == num then
+	return ply
       end
     end
     -- If the above two exact searches fail, try doing a partial search
-    for _, v in pairs(player.GetAll()) do
-      if string.find(string.lower(v:Nick()), nick) then
-	return v
+    for _, ply in pairs(player.GetAll()) do
+      if string.find(string.lower(ply:Nick()), nick) then
+	return ply
       end
     end
   end
 end
+
 if not NADMOD.Props then
   -- NADMOD PP Initialization
   NADMOD.PPVersion = "1.2.6p"
@@ -63,9 +65,9 @@ if not NADMOD.Props then
     autocdp = 0,
     autocdpadmins = false
   }
-  for k, v in pairs(configVals) do
+  for k, config in pairs(configVals) do
     if NADMOD.PPConfig[k] == nil then
-      NADMOD.PPConfig[k] = v
+      NADMOD.PPConfig[k] = config
     end
   end
 
@@ -109,18 +111,18 @@ end
 
 function NADMOD.PPInitPlayer(ply)
   local steamid = ply:SteamID()
-  for _,v in pairs(NADMOD.Props) do
-    if v.SteamID == steamid then
-      v.Owner = ply
-      v.Ent.SPPOwner = ply
-      v.Ent.Owner = ply
+  for _, prop in pairs(NADMOD.Props) do
+    if prop.SteamID == steamid then
+      prop.Owner = ply
+      prop.Ent.SPPOwner = ply
+      prop.Ent.Owner = ply
     end
   end
   net.Start("nadmod_propowners")
   net.WriteUInt(table.Count(NADMOD.Props), 16)
-  for k,v in pairs(NADMOD.Props) do
-    net.WriteUInt(k,16)
-    net.WriteString(v.Name)
+  for k, prop in pairs(NADMOD.Props) do
+    net.WriteUInt(k, 16)
+    net.WriteString(prop.Name)
   end
   net.Send(ply)
 end
@@ -130,9 +132,9 @@ function NADMOD.RefreshOwners()
   if next(NADMOD.PropOwnersSmall) then
     net.Start("nadmod_propowners")
     net.WriteUInt(table.Count(NADMOD.PropOwnersSmall), 16)
-    for k,v in pairs(NADMOD.PropOwnersSmall) do
+    for k, owner in pairs(NADMOD.PropOwnersSmall) do
       net.WriteUInt(k, 16)
-      net.WriteString(v)
+      net.WriteString(owner)
     end
     net.Broadcast()
     table.Empty(NADMOD.PropOwnersSmall)
@@ -259,8 +261,8 @@ function NADMOD.CanTool(ply, tr, mode)
     end
   elseif(mode == "remover") then
     if ply:KeyDown(IN_ATTACK2) or ply:KeyDownLast(IN_ATTACK2) then
-      for k, v in pairs(constraint.GetAllConstrainedEntities(ent) or {}) do
-	if !NADMOD.PlayerCanTouch(ply, v) then
+      for k, conEnt in pairs(constraint.GetAllConstrainedEntities(ent) or {}) do
+	if not NADMOD.PlayerCanTouch(ply, conEnt) then
 	  return false
 	end
       end
@@ -354,12 +356,12 @@ end
 -- Loop through all entities that exist when the map is loaded, these are all "world owned" entities
 function NADMOD.WorldOwner()
   local WorldEnts = 0
-  for k,v in pairs(ents.FindByClass("*")) do
-    if(!v:IsPlayer() and !NADMOD.Props[v:EntIndex()]) and not IsValid(v.Owner) then
-      if game.GetMap() == "gm_construct" and v:GetClass() == "func_brush" then
-	v:CPPISetOwnerless(true)
+  for k, ent in pairs(ents.FindByClass("*")) do
+    if(not ent:IsPlayer() and not NADMOD.Props[ent:EntIndex()]) and not IsValid(ent.Owner) then
+      if game.GetMap() == "gm_construct" and ent:GetClass() == "func_brush" then
+	ent:CPPISetOwnerless(true)
       else
-	NADMOD.SetOwnerWorld(v)
+	NADMOD.SetOwnerWorld(ent)
       end
       WorldEnts = WorldEnts + 1
     end
@@ -409,13 +411,13 @@ hook.Add(
 --==========================================================--
 function NADMOD.CleanupPlayerProps(steamid)
   local count = 0
-  for k, v in pairs(NADMOD.Props) do
-    if v.SteamID == steamid then
-      if IsValid(v.Ent) then
-	v.Ent:Remove()
+  for k, prop in pairs(NADMOD.Props) do
+    if prop.SteamID == steamid then
+      if IsValid(prop.Ent) then
+	prop.Ent:Remove()
 	count = count + 1
       else
-	NADMOD.EntityRemoved(v.Ent)
+	NADMOD.EntityRemoved(prop.Ent)
       end
     end
   end
@@ -459,9 +461,9 @@ function NADMOD.CleanName(ply, cmd, args, fullstr)
   end
   local tarname = string.lower(fullstr)
   local count = 0
-  for k,v in pairs(NADMOD.Props) do
-    if IsValid(v.Ent) and string.find(string.lower(v.Name), tarname, 1, true) then
-      v.Ent:Remove()
+  for k, prop in pairs(NADMOD.Props) do
+    if IsValid(prop.Ent) and string.find(string.lower(prop.Name), tarname, 1, true) then
+      prop.Ent:Remove()
       count = count + 1
     end
   end
@@ -475,11 +477,11 @@ function NADMOD.CDP(ply, cmd, args)
   end
 
   local count = 0
-  for k, v in pairs(NADMOD.Props) do
-    if not v.Ent:IsValid() then
-      NADMOD.EntityRemoved(v.Ent)
-    elseif not IsValid(v.Owner) and (v.Name != "O" and v.Name != "W") then
-      v.Ent:Remove()
+  for k, prop in pairs(NADMOD.Props) do
+    if not prop.Ent:IsValid() then
+      NADMOD.EntityRemoved(prop.Ent)
+    elseif not IsValid(prop.Owner) and (prop.Name != "O" and prop.Name != "W") then
+      prop.Ent:Remove()
       count = count + 1
     end
   end
@@ -499,8 +501,8 @@ function NADMOD.CleanClass(ply, cmd, args)
   else
     NADMOD.Notify(args[1] .. " have been cleaned up")
   end
-  for _,v in ipairs(ents.FindByClass(args[1])) do
-    v:Remove()
+  for _, ent in ipairs(ents.FindByClass(args[1])) do
+    ent:Remove()
   end
 end
 concommand.Add("nadmod_cleanclass", NADMOD.CleanClass)
@@ -538,11 +540,11 @@ function NADMOD.DebugTotals(ply, cmd, args)
   end
 
   local tab = {}
-  for k, v in pairs(NADMOD.Props) do
-    local name = v.Name
+  for k, prop in pairs(NADMOD.Props) do
+    local name = prop.Name
     if name == "O" then name = "Ownerless"
     elseif name == "W" then name = "World"
-    elseif not v.Owner:IsValid() then name = "[Disconnected]" .. name
+    elseif not prop.Owner:IsValid() then name = "[Disconnected]" .. name
     end
     tab[name] = (tab[name] or 0) + 1
   end
@@ -586,8 +588,8 @@ concommand.Add(
       friends = table.Copy(NADMOD.Users[ply:SteamID()].Friends) or {}
     end
     if NADMOD.PPConfig["adminall"] then
-      for _,v in pairs(player.GetAll()) do
-	if NADMOD.IsPPAdmin(v) then friends[v:SteamID()] = true end
+      for _, ply in pairs(player.GetAll()) do
+	if NADMOD.IsPPAdmin(ply) then friends[ply:SteamID()] = true end
       end
     end
     net.Start("nadmod_ppfriends")
@@ -596,19 +598,19 @@ concommand.Add(
 end)
 net.Receive(
   "nadmod_ppfriends",
-  function(len,ply)
+  function(len, ply)
     if not ply:IsValid() then
       return
     end
-    if !NADMOD.Users[ply:SteamID()] then
+    if not NADMOD.Users[ply:SteamID()] then
       NADMOD.Users[ply:SteamID()] = {Rank = 1}
     end
     NADMOD.Users[ply:SteamID()].Friends = NADMOD.Users[ply:SteamID()].Friends or {}
     local outtab = NADMOD.Users[ply:SteamID()].Friends
 
     local players = {}
-    for _, v in pairs(player.GetAll()) do
-      players[v:SteamID()] = v
+    for _, prop in pairs(player.GetAll()) do
+      players[prop:SteamID()] = prop
     end
 
     for steamid, bool in pairs(net.ReadTable()) do
@@ -642,8 +644,8 @@ function metaply:CPPIGetFriends()
   end
   local ret = {}
   local friends = (NADMOD.Users[self:SteamID()] or {Friends={}}).Friends or {}
-  for _, v in pairs(player.GetAll()) do
-    if NADMOD.IsPPAdmin(v) or friends[v:SteamID()] then table.insert(ret, v) end
+  for _, ply in pairs(player.GetAll()) do
+    if NADMOD.IsPPAdmin(ply) or friends[ply:SteamID()] then table.insert(ret, ply) end
   end
   return ret
 end

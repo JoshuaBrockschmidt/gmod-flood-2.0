@@ -1,8 +1,8 @@
 function GM:RealismThink()
-  for _, v in pairs(player.GetAll()) do
-    if v:IsOnFire() and v:WaterLevel() > 1 then
+  for _, ply in pairs(player.GetAll()) do
+    if ply:IsOnFire() and ply:WaterLevel() > 1 then
       -- TODO: Should not extinguish if they are above water.
-      v:Extinguish()
+      ply:Extinguish()
     end
   end
 end

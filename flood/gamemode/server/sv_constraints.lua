@@ -17,7 +17,7 @@ timer.Create(
     for _, ent in pairs(ents.GetAll()) do
       if isConstraintableEntity(ent) then
 	local ctab = constraint.GetTable(ent)
-	for _,cdata in pairs(ctab) do
+	for _, cdata in pairs(ctab) do
 	  local own = cdata.Owner
 	  for _, conent in pairs(cdata.Entity) do
 	    if conent.Entity == game.GetWorld() then
@@ -25,7 +25,11 @@ timer.Create(
 	      ent:EmitSound("buttons/button2.wav")
 	      if own then
 		own:ChatPrint(
-		  string.format("Your %s constraint on %s was removed because it was constrainted to the world.", cdata.Type, tostring(ent))
+		  string.format(
+		    "Your %s constraint on %s was removed because it was constrainted to the world.",
+		    cdata.Type,
+		    tostring(ent)
+		  )
 		)
 	      end
 	    end
@@ -40,7 +44,10 @@ timer.Create(
 ----                                 Can Tool                                              ----
 -----------------------------------------------------------------------------------------------
 function GM:CanTool(ply, tr, tool)
-  if ply:IsAdmin() then return true end
+  if ply:IsAdmin() then
+    return true
+  end
+
   for _, tools in pairs(self:CompileToolTable()) do
     if tostring(tools[1]) == tostring(tool) and tobool(tools[3]) == true then
       if tr.Entity:IsWorld() then

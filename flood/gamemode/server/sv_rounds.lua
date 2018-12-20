@@ -43,9 +43,9 @@ function GM:CheckForWinner()
     end
 
     -- Determine team conditions.
-    local AllAreFriends = true
-    for k, ply1 in pairs(players) do
-      for x, ply2 in pairs(players) do
+    local allAreFriends = true
+    for _, ply1 in pairs(players) do
+      for _, ply2 in pairs(players) do
 	-- Dont look at the same person
 	if ply1 == ply2 then
 	  continue
@@ -55,7 +55,7 @@ function GM:CheckForWinner()
 	if PlayerIsFriend(ply1, ply2) and PlayerIsFriend(ply2, ply1) then
 	  continue
 	else
-	  AllAreFriends = false
+	  allAreFriends = false
 	  break
 	end
       end
@@ -63,7 +63,7 @@ function GM:CheckForWinner()
 
     -- Determine if there are any winners.
     doReset = false
-    if AllAreFriends == true and count != 0 then
+    if allAreFriends == true and count != 0 then
       -- A group of players won.
       self:DeclareWinner(0, players)
       doReset = true
@@ -90,14 +90,14 @@ end
 -- @param winner Table of players for case 0, a single player for case 1, and nothing for case 2 or 3.
 function GM:DeclareWinner(case, winner)
   if case == 0 and type(winner) == "table" then
-    for _, v in pairs(winner) do
-      if IsValid(v) and v:Alive() and self:GetGameState() == FLOOD_GS_FIGHT then
+    for _, ply in pairs(winner) do
+      if IsValid(ply) and ply:Alive() and self:GetGameState() == FLOOD_GS_FIGHT then
 	local cash = GetConVar("flood_bonus_cash"):GetInt()
-	v:AddCash(cash)
+	ply:AddCash(cash)
 
 	local ct = ChatText()
 	ct:AddText("[Flood] ", Color(132, 199, 29, 255))
-	ct:AddText(v:Nick(), self:FormatColor(v:GetPlayerColor()))
+	ct:AddText(ply:Nick(), self:FormatColor(ply:GetPlayerColor()))
 	ct:AddText(" won and recieved an additional $" .. cash .. "!")
 	ct:SendAll()
       end

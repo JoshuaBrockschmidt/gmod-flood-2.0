@@ -19,12 +19,12 @@ GM.ConstructionTools = {
 function GM:CompileToolTable()
   local tools = {}
 
-  for _, v in pairs(self.ConstraintTools) do
-    table.insert(tools, v)
+  for _, tool in pairs(self.ConstraintTools) do
+    table.insert(tools, tool)
   end
 
-  for _, v in pairs(self.ConstructionTools) do
-    table.insert(tools, v)
+  for _, tool in pairs(self.ConstructionTools) do
+    table.insert(tools, tool)
   end
 
   return tools

@@ -84,8 +84,8 @@ function GM:AddPlayerAction(...)
   end
   local pnl = vgui.Create("GameNotice", g_DeathNotify)
 
-  for k, v in ipairs({...}) do
-    pnl:AddText(v)
+  for _, text in ipairs({...}) do
+    pnl:AddText(text)
   end
 
   g_DeathNotify:AddItem(pnl)

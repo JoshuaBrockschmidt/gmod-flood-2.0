@@ -28,6 +28,7 @@ for _, file in pairs (file.Find("flood/gamemode/client/vgui/*.lua", "LUA")) do
 end
 
 -- Timer ConVars
+
 CreateConVar("flood_build_time", 240, FCVAR_NOTIFY,
 	     "Time allowed for building (def: 240)")
 CreateConVar("flood_board_time", 20, FCVAR_NOTIFY,
@@ -72,9 +73,9 @@ end
 
 function GM:InitPostEntity()
   self:CheckForWaterControllers()
-  for k,v in pairs(ents.GetAll()) do
-    if v:GetClass() == "trigger_hurt" then
-      v:Remove()
+  for _, ent in pairs(ents.GetAll()) do
+    if ent:GetClass() == "trigger_hurt" then
+      ent:Remove()
     end
   end
 end
@@ -113,10 +114,10 @@ function GM:EntityTakeDamage(ent, dmginfo)
 	  if attacker:GetActiveWeapon():GetClass() == "weapon_pistol" then
 	    ent:SetNWInt("CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - 1)
 	  else
-	    for _, Weapon in pairs(Weapons) do
-	      if attacker:GetActiveWeapon():GetClass() == Weapon.Class then
+	    for _, weapon in pairs(Weapons) do
+	      if attacker:GetActiveWeapon():GetClass() == weapon.Class then
 		ent:SetNWInt(
-		  "CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - tonumber(Weapon.Damage)
+		  "CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - tonumber(weapon.Damage)
 		)
 	      end
 	    end

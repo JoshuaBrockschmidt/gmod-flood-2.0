@@ -1,10 +1,15 @@
-local function PlayerIsFriend(ply, ply2)
+--- Checks if a player is a friend or another.
+-- @param ply1 First player.
+-- @param ply2 Player to check.
+-- @param nil if either player is invalid, true if ply2 is a friend of ply1,
+--    and false if they are not.
+local function PlayerIsFriend(ply1, ply2)
   if not IsValid(ply) or not IsValid(ply2) then
     return
   end
 
-  for k, v in pairs(ply:CPPIGetFriends()) do
-    if v == ply2 then
+  for _, friend in pairs(ply1:CPPIGetFriends()) do
+    if friend == ply2 then
       return true
     end
   end

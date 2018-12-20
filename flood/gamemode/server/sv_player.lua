@@ -49,13 +49,13 @@ function GM:PlayerSpawn(ply)
 end
 
 function GM:ForcePlayerSpawn()
-  for _, v in pairs(player.GetAll()) do
-    if v:CanRespawn() then
-      if v.NextSpawnTime && v.NextSpawnTime > CurTime() then
+  for _, ply in pairs(player.GetAll()) do
+    if ply:CanRespawn() then
+      if ply.NextSpawnTime and ply.NextSpawnTime > CurTime() then
 	return
       end
-      if not v:Alive() and IsValid(v) then
-	v:Spawn()
+      if not ply:Alive() and IsValid(ply) then
+	ply:Spawn()
       end
     end
   end
@@ -172,25 +172,25 @@ end
 ----                                 Give the player their weapons                         ----
 -----------------------------------------------------------------------------------------------
 function GM:GivePlayerWeapons()
-  for _, v in pairs(self:GetActivePlayers()) do
+  for _, ply in pairs(self:GetActivePlayers()) do
     -- Because the player always needs a pistol
-    v:Give("weapon_pistol")
+    ply:Give("weapon_pistol")
     timer.Simple(
       0,
       function()
-	v:GiveAmmo(9999, "Pistol")
+	ply:GiveAmmo(9999, "Pistol")
       end
     )
 
-    if v.Weapons and Weapons then
-      for __, pWeapon in pairs(v.Weapons) do
-	for ___, Weapon in pairs(Weapons) do
+    if ply.Weapons and Weapons then
+      for _, pWeapon in pairs(ply.Weapons) do
+	for _, Weapon in pairs(Weapons) do
 	  if pWeapon == Weapon.Class then
-	    v:Give(Weapon.Class)
+	    ply:Give(Weapon.Class)
 	    timer.Simple(
 	      0,
 	      function()
-		v:GiveAmmo(Weapon.Ammo, Weapon.AmmoClass)
+		ply:GiveAmmo(Weapon.Ammo, Weapon.AmmoClass)
 	      end
 	    )
 	  end
@@ -230,8 +230,8 @@ end
 hook.Add("PlayerDisconnected", "PlayerDisconnect", PlayerLeft)
 
 function ServerDown()
-  for k, v in pairs(player.GetAll()) do
-    v:Save()
+  for _, ply in pairs(player.GetAll()) do
+    ply:Save()
   end
 end
 hook.Add("ShutDown", "ServerShutDown", ServerDown)

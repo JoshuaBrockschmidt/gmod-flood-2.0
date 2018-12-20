@@ -269,8 +269,8 @@ if INCLUDE_CSGO_PROPS then
       Description = "Couch",
       Model = "models/props/cs_militia/couch.mdl",
       Group = FLOAT_PROPS,
-      Price = 500,
-      Health = 1000,
+      Price = 150,
+      Health = 500,
       DonatorOnly = false
   })
   addProp({

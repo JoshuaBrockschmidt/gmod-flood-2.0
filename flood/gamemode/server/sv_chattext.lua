@@ -26,7 +26,7 @@ end
 
 function meta:NetConstructMsg()
   net.Start("SendChatMessage")
-  for k, msg in pairs(self.msgs) do
+  for _, msg in pairs(self.msgs) do
     net.WriteUInt(1,8)
     net.WriteString(msg.string)
     net.WriteVector(Vector(msg.color.r, msg.color.g, msg.color.b))

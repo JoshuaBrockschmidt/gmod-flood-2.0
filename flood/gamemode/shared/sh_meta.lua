@@ -3,8 +3,8 @@ local EntityMeta = FindMetaTable("Entity")
 local Donators = {"vip", "donator"}
 
 function MetaPlayer:IsDonator()
-  for _, v in pairs(Donators) do
-    if self:IsUserGroup(v) then
+  for _, donator in pairs(Donators) do
+    if self:IsUserGroup(donator) then
       return true
     end
   end

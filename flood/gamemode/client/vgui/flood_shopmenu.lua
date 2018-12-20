@@ -44,9 +44,12 @@ function PANEL:Init()
   self.LeftContentPanel.Paint = function(panel, w, h)
     draw.RoundedBoxEx(6, 0, 0, w, h, Color(240, 240, 240, 255), false, false, true, true)
     draw.RoundedBox(0, 0, 0, w, 20, Color(24, 24, 24, 255))
-    for k, v in pairs(self.LeftContentPanel.Items) do
-      if (!v.Tab) then continue end
-      v.Tab.Paint = function(self,w,h)
+    for _, ctrlItem in pairs(self.LeftContentPanel.Items) do
+      if not ctrlItem.Tab then
+	continue
+      end
+
+      ctrlItem.Tab.Paint = function(self, w, h)
 	if self:IsActive() then
 	  draw.RoundedBox(0, 0, 0, w - 5, h - 8, Color(24, 24, 24, 255))
 	  draw.RoundedBox(0, 0, 0, w - 5, h - 8, Color(255, 255, 255, 3))
@@ -58,9 +61,11 @@ function PANEL:Init()
   end
 
   self.LeftContentPanel:AddSheet(
-    "Props", vgui.Create("Flood_ShopMenu_Props", self.LeftFrame), "icon16/house.png")
+    "Props", vgui.Create("Flood_ShopMenu_Props", self.LeftFrame), "icon16/house.png"
+  )
   self.LeftContentPanel:AddSheet(
-    "Weapons", vgui.Create("Flood_ShopMenu_Weapons", self.LeftFrame), "icon16/gun.png")
+    "Weapons", vgui.Create("Flood_ShopMenu_Weapons", self.LeftFrame), "icon16/gun.png"
+  )
 
   self.RightContentPanel = vgui.Create("DPropertySheet", self.RightFrame)
   self.RightContentPanel:SetPos(0, 25)
@@ -68,9 +73,12 @@ function PANEL:Init()
   self.RightContentPanel.Paint = function(panel, w, h)
     draw.RoundedBoxEx(6, 0, 0, w, h, Color(240, 240, 240, 255), false, false, true, true)
     draw.RoundedBox(0, 0, 0, w, 20, Color(24, 24, 24, 255))
-    for k, v in pairs(self.RightContentPanel.Items) do
-      if (!v.Tab) then continue end
-      v.Tab.Paint = function(self,w,h)
+    for _, ctrlItem in pairs(self.RightContentPanel.Items) do
+      if not ctrlItem.Tab then
+	continue
+      end
+
+      ctrlItem.Tab.Paint = function(self, w, h)
 	if self:IsActive() then
 	  draw.RoundedBox(0, 0, 0, w - 5, h - 8, Color(24, 24, 24, 255))
 	  draw.RoundedBox(0, 0, 0, w - 5, h - 8, Color(255, 255, 255, 3))
@@ -82,7 +90,8 @@ function PANEL:Init()
   end
 
   self.RightContentPanel:AddSheet(
-    "Tools", vgui.Create("Flood_ShopMenu_Tools", self.RightFrame), "icon16/wrench.png")
+    "Tools", vgui.Create("Flood_ShopMenu_Tools", self.RightFrame), "icon16/wrench.png"
+  )
   local PropProtection = vgui.Create("Flood_ShopMenu_PropProtection", self.RightFrame)
   self.RightContentPanel:AddSheet("Prop Protection", PropProtection, "icon16/asterisk_orange.png")
   self.RightContentPanel.SetActiveTab = function(self, tab)

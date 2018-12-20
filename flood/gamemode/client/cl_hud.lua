@@ -73,6 +73,7 @@ net.Receive(
   end
 )
 
+--- Draw the HUD.
 function GM:HUDPaint()
   if BuildTimer and BoardTimer and FloodTimer and FightTimer and ResetTimer then
     -- Draw boxes indicating the current game phase and the time remaining
@@ -252,9 +253,14 @@ function GM:HUDPaint()
   end
 end
 
-function hidehud(name)
-  for k, v in pairs{"CHudHealth", "CHudBattery", "CHudAmmo", "CHudSecondaryAmmo"} do 
-    if name == v then return false end
+--- Checks whether a HUD should be drawn.
+-- @param name Name of the HUD.
+-- @return true if the HUD should be draw and false otherwise.
+local function hideHud(name)
+  for _, validName in pairs{"CHudHealth", "CHudBattery", "CHudAmmo", "CHudSecondaryAmmo"} do
+    if name == validName then
+      return false
+    end
   end
 end
-hook.Add("HUDShouldDraw", "hidehud", hidehud)
+hook.Add("HUDShouldDraw", "hideHud", hideHud)

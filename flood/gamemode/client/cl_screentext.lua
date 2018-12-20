@@ -1,5 +1,5 @@
 -- TEXTABLE LAYOUT
--- {"Text", Color(), duration, alrgorithm}
+-- {"Text", Color(), duration, algorithm}
 local TEXTABLE = {}
 
 surface.CreateFont(
@@ -40,12 +40,12 @@ surface.CreateFont(
     outline = false,
 })
 
-for I = 0, 20 do
+for i = 0, 20 do
   surface.CreateFont(
-    "TEXREND" .. I,
+    "TEXREND" .. i,
     {
       font = "Tehoma",
-      size = 70 + I*1.5,
+      size = 70 + i * 1.5,
       weight = 900,
       blursize = 0,
       scanlines = 0,
@@ -61,20 +61,22 @@ for I = 0, 20 do
   })
 end
 
+--- Renders queued text on the player's screen and removes them from the queue when their duration
+-- of display is fully diminished.
 function GM:DrawScreenText()
   local icou = 0
-  for k, v in pairs(TEXTABLE) do
+  for k, textInfo in pairs(TEXTABLE) do
     icou = icou + 1
-    if !v.__DEX then
-      v.__DEX = {}
-      v.__DEX.STime = CurTime()
+    if not textInfo.__DEX then
+      textInfo.__DEX = {}
+      textInfo.__DEX.STime = CurTime()
     end
-    local dur = v[3]
-    local col = v[2]
-    local text = v[1]
-    local alg = v[4]
+    local dur = textInfo[3]
+    local col = textInfo[2]
+    local text = textInfo[1]
+    local alg = textInfo[4]
     surface.SetFont("TEXREND")
-    local wi,hei = surface.GetTextSize("ABCDEFG")
+    local wi, hei = surface.GetTextSize("ABCDEFG")
     if alg == "flash" then
       draw.SimpleText(
 	text, "TEXREND", ScrW() / 2 , (ScrH() / 5) + icou * hei,
@@ -83,21 +85,6 @@ function GM:DrawScreenText()
       )
     end
 
-    if alg == "sideside" then
-      draw.SimpleText(
-	text, "TEXREND",
-	(ScrW() / 2) + math.sin((CurTime() - v.__DEX.STime) * 5) * 100,
-	(ScrH() / 5) + icou * hei , Color(col.r, col.g, col.b, 255),
-	TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER
-      )
-    end
-    if alg == "pulse" then
-      draw.SimpleText(
-	text, "TEXREND" .. math.abs(math.floor(math.sin((CurTime() - v.__DEX.STime) * 5) * 20)),
-	(ScrW() / 2)  , (ScrH() / 5) + icou * hei , Color(col.r, col.g, col.b, 255),
-	TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER
-      )
-    end
     if alg == "none" then
       draw.SimpleText(
 	text, "TEXREND",
@@ -105,15 +92,27 @@ function GM:DrawScreenText()
 	Color(col.r, col.g, col.b, 255),
 	TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER
       )
-    end
-    if alg == "small" then
+    elseif alg == "sideside" then
+      draw.SimpleText(
+	text, "TEXREND",
+	(ScrW() / 2) + math.sin((CurTime() - textInfo.__DEX.STime) * 5) * 100,
+	(ScrH() / 5) + icou * hei , Color(col.r, col.g, col.b, 255),
+	TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER
+      )
+    elseif alg == "pulse" then
+      draw.SimpleText(
+	text, "TEXREND" .. math.abs(math.floor(math.sin((CurTime() - textInfo.__DEX.STime) * 5) * 20)),
+	(ScrW() / 2)  , (ScrH() / 5) + icou * hei , Color(col.r, col.g, col.b, 255),
+	TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER
+      )
+    elseif alg == "small" then
       draw.SimpleText(
 	text, "TEXREND_SMALL", (ScrW() / 2), (ScrH() / 5) + icou * hei,
 	Color(col.r, col.g, col.b, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER
       )
     end
 
-    if ((v.__DEX.STime + dur) - CurTime()) < 0 then
+    if ((textInfo.__DEX.STime + dur) - CurTime()) < 0 then
       TEXTABLE[k] = nil
     end
   end
@@ -126,28 +125,41 @@ hook.Add(
   end
 )
 
-function GM:AddTextRegister(text, col, duration, type)
-  for k, v in pairs(TEXTABLE) do
+--- Temporarily displays text on the player's screen.
+-- @param text Text to display.
+-- @param col Color of the text.
+-- @param duration Seconds to display the text for.
+-- @param typ Method of displaying the text.
+--      * none - No effects.
+--      * flash - Repeatedly flash the text.
+--      * sideside - Move text side to side.
+--      * pulse - Flucuate the size of the text.
+--      * small - Small text.
+function GM:AddTextRegister(text, col, duration, typ)
+  for _, textInfo in pairs(TEXTABLE) do
     if col == Color(123, 123, 123) then
       col = Color(math.random(1, 255), math.random(1, 255), math.random(1, 255))
     end
-    if v[1] == text then
-      v[2] = col
-      v[3] = duration
+    if textInfo[1] == text then
+      textInfo[2] = col
+      textInfo[3] = duration
       return
     end
   end
-  TEXTABLE[#TEXTABLE + 1] = {text, col, duration, type}
+  TEXTABLE[#TEXTABLE + 1] = {text, col, duration, typ}
 end
 
+--- Removes text registered with GM:AddTextRegister from the player's screen prematurely.
+-- @param text Text identifying the registered text object to remove.
 function GM:RemoveText(text)
-  for k, v in pairs(TEXTABLE) do
-    if v[1] == text then
+  for k, textInfo in pairs(TEXTABLE) do
+    if textInfo[1] == text then
       TEXTABLE[k] = nil
     end
   end
 end
 
+--- Add or removes text from the screen as per the server's request.
 function GM:GetScreenMessage()
   local command = net.ReadString()
   local data = net.ReadTable()
