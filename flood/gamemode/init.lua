@@ -28,7 +28,6 @@ for _, file in pairs (file.Find("flood/gamemode/client/vgui/*.lua", "LUA")) do
 end
 
 -- Timer ConVars
-
 CreateConVar("flood_build_time", 240, FCVAR_NOTIFY,
 	     "Time allowed for building (def: 240)")
 CreateConVar("flood_board_time", 20, FCVAR_NOTIFY,
@@ -102,60 +101,6 @@ end
 function GM:ShowHelp(ply)
   ply:ConCommand("flood_helpmenu")
 end
-
-function GM:EntityTakeDamage(ent, dmginfo)
-  -- Apply damage to props if it is fighting phase.
-  if GAMEMODE:GetGameState() == FLOOD_GS_FIGHT then
-    local attacker = dmginfo:GetAttacker()
-    if not ent:IsPlayer() then
-      if attacker:IsPlayer() then
-	if attacker:GetActiveWeapon() ~= NULL then
-	  -- TODO: Why do we need a special case for the pistol?
-	  if attacker:GetActiveWeapon():GetClass() == "weapon_pistol" then
-	    ent:SetNWInt("CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - 1)
-	  else
-	    for _, weapon in pairs(Weapons) do
-	      if attacker:GetActiveWeapon():GetClass() == weapon.Class then
-		ent:SetNWInt(
-		  "CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - tonumber(weapon.Damage)
-		)
-	      end
-	    end
-	  end
-	end
-      else
-	if attacker:GetClass() == "entityflame" then
-	  ent:SetNWInt("CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - 0.5)
-	else
-	  ent:SetNWInt("CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - 1)
-	end
-      end
-
-      if ent:GetNWInt("CurrentPropHealth") <= 0 and IsValid(ent) then
-	ent:Remove()
-      end
-    end
-  else
-    return false
-  end
-end
-
-function ShouldTakeDamage(victim, attacker)
-  -- Only take damage during the flooding and fighting phase.
-  local gs = GAMEMODE:GetGameState()
-  if gs == FLOOD_GS_FLOOD or gs == FLOOD_GS_FIGHT then
-    if attacker:IsPlayer() and victim:IsPlayer() then
-      return false
-    else
-      if attacker:GetClass() ~= "prop_*" and attacker:GetClass() ~= "entityflame" then
-	return true
-      end
-    end
-  else
-    return false
-  end
-end
-hook.Add("PlayerShouldTakeDamage", "Flood_PlayerShouldTakeDamage", ShouldTakeDamage)
 
 function GM:KeyPress(ply, key)
   if not ply:Alive() then
