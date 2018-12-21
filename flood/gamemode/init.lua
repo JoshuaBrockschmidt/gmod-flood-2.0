@@ -104,7 +104,7 @@ function GM:ShowHelp(ply)
 end
 
 function GM:EntityTakeDamage(ent, dmginfo)
-  -- Apply damage if it is fighting phase.
+  -- Apply damage to props if it is fighting phase.
   if GAMEMODE:GetGameState() == FLOOD_GS_FIGHT then
     local attacker = dmginfo:GetAttacker()
     if not ent:IsPlayer() then
@@ -141,10 +141,9 @@ function GM:EntityTakeDamage(ent, dmginfo)
 end
 
 function ShouldTakeDamage(victim, attacker)
-  -- Only take damage during the fighting phase.
-  if GAMEMODE:GetGameState() ~= FLOOD_GS_FIGHT then
-    return false
-  else
+  -- Only take damage during the flooding and fighting phase.
+  local gs = GAMEMODE:GetGameState()
+  if gs == FLOOD_GS_FLOOD or gs == FLOOD_GS_FIGHT then
     if attacker:IsPlayer() and victim:IsPlayer() then
       return false
     else
@@ -152,6 +151,8 @@ function ShouldTakeDamage(victim, attacker)
 	return true
       end
     end
+  else
+    return false
   end
 end
 hook.Add("PlayerShouldTakeDamage", "Flood_PlayerShouldTakeDamage", ShouldTakeDamage)
