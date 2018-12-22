@@ -5,10 +5,21 @@
 local WATER_COVER_THRES = 20 -- 20 was chosen through experimentation.
 
 function GM:EntityTakeDamage(ent, dmginfo)
+  -- We will take a whitelisting approach to accepting damage events. Note that returning true
+  -- blocks a damage event.
+
+  local blockDmg = true
+
   -- Apply damage to props if it is fighting phase.
   if GAMEMODE:GetGameState() == FLOOD_GS_FIGHT then
     local attacker = dmginfo:GetAttacker()
-    if not ent:IsPlayer() then
+    if ent:IsPlayer() then
+      if attacker:GetClass() == "worldspawn" then
+	-- Allow world damage to players, such as water damage.
+	blockDmg = false
+      end
+    else
+      -- Handle prop damage.
       if attacker:IsPlayer() then
 	if attacker:GetActiveWeapon() ~= NULL then
 	  -- TODO: Why do we need a special case for the pistol?
@@ -24,21 +35,21 @@ function GM:EntityTakeDamage(ent, dmginfo)
 	    end
 	  end
 	end
+      elseif attacker:GetClass() == "entityflame" then
+	ent:SetNWInt("CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - 0.5)
       else
-	if attacker:GetClass() == "entityflame" then
-	  ent:SetNWInt("CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - 0.5)
-	else
-	  ent:SetNWInt("CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - 1)
-	end
+	-- TODO: What is this for?
+	ent:SetNWInt("CurrentPropHealth", ent:GetNWInt("CurrentPropHealth") - 1)
       end
 
+      -- Check if the prop's health is depleted.
       if ent:GetNWInt("CurrentPropHealth") <= 0 and IsValid(ent) then
 	ent:Remove()
       end
     end
-  else
-    return false
   end
+
+  return blockDmg
 end
 
 function ShouldTakeDamage(victim, attacker)
