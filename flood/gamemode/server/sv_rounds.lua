@@ -144,22 +144,17 @@ end
 function GM:RefundAllProps()
   for _, ent in pairs(ents.GetAll()) do
     if ent:GetClass() == "prop_physics" then
-      if ent:CPPIGetOwner() ~= nil and ent:CPPIGetOwner() ~= NULL and ent:CPPIGetOwner() ~= "" then
+      local owner = ent:CPPIGetOwner()
+      if owner ~= nil and owner ~= NULL and owner ~= "" then
 	local currentHealth = tonumber(ent:GetNWInt("CurrentPropHealth"))
 	local baseHealth = tonumber(ent:GetNWInt("BasePropHealth"))
-	local currentCash = tonumber(ent:CPPIGetOwner():GetNWInt("flood_cash"))
-	local receive = (currentHealth / baseHealth) * baseHealth
-	if receive > 0 then
-	  ent:Remove()
-	  if ent:CPPIGetOwner():IsValid() then
-	    ent:CPPIGetOwner():AddCash(receive)
-	  end
-	else
-	  ent:Remove()
+	local price = tonumber(ent:GetNWInt("PropPrice"))
+	local refund = (currentHealth / baseHealth) * price
+	if refund > 0 and owner:IsValid() then
+	  owner:AddCash(refund)
 	end
-      else
-	ent:Remove()
       end
+      ent:Remove()
     end
   end
 end

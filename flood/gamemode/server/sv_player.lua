@@ -298,6 +298,7 @@ function GM:PurchaseProp(ply, cmd, args)
 	  ent:SetHealth(Prop.Health)
 	  ent:SetNWInt("CurrentPropHealth", math.floor(Prop.Health))
 	  ent:SetNWInt("BasePropHealth", math.floor(Prop.Health))
+	  ent:SetNWInt("PropPrice", math.floor(Prop.Price))
 
 	  ct:AddText("[Flood] ", Color(132, 199, 29, 255))
 	  ct:AddText("You have purchased a(n) " .. Prop.Description .. ".")
