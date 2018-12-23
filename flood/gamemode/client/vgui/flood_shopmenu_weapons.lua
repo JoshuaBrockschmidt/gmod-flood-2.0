@@ -42,10 +42,16 @@ function PANEL:Init()
 	surface.PlaySound("ui/buttonclick.wav")
       end
 
-      if v.Name and v.Price and v.Damage and v.Ammo then
-	ItemIcon:SetTooltip(
-	  string.format("%s\nPrice: $%s\nAmmo: %s", v.Name, v.Price, v.Damage, v.Ammo)
-	)
+      if v.Name and v.Price and v.Damage then
+	if v.Ammo then
+	  ItemIcon:SetTooltip(
+	    string.format("%s\nPrice: $%s\nAmmo: %s", v.Name, v.Price, v.Damage, v.Ammo)
+	  )
+	else
+	  ItemIcon:SetTooltip(
+	    string.format("%s\nPrice: $%s", v.Name, v.Price, v.Damage)
+	  )
+	end
       else
 	ItemIcon:SetTooltip("Failed to load tooltip - Missing Description")
       end

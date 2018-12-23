@@ -173,6 +173,12 @@ function GM:FightPhase()
     -- Lower water.
     self:LowerAllWaterControllers()
 
+    -- Remove all weapons and ammo from all players.
+    for _, ply in pairs(self:GetActivePlayers()) do
+      ply:StripWeapons()
+      ply:RemoveAllAmmo()
+    end
+
     -- Declare winner is nobody because time ran out.
     self:DeclareWinner(3)
   else

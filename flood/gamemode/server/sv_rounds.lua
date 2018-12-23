@@ -78,6 +78,12 @@ function GM:CheckForWinner()
     end
 
     if doReset then
+      -- Remove all weapons and ammo from all players.
+      for _, ply in pairs(self:GetActivePlayers()) do
+	ply:StripWeapons()
+	ply:RemoveAllAmmo()
+      end
+
       self:SetGameState(FLOOD_GS_RESET)
       self:LowerAllWaterControllers()
     end

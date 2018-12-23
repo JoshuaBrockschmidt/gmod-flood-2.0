@@ -3,11 +3,11 @@ local PlayerMeta = FindMetaTable("Player")
 function GM:PlayerInitialSpawn(ply)
   ply.Allow = false
 
-  local data = { }
+  local data = {}
   data = ply:LoadData()
 
   ply:SetCash(data.cash)
-  ply.Weapons = string.Explode("\n", data.weapons)
+  ply.Weapons = data.weapons
 
   ply:SetTeam(TEAM_PLAYER)
 
@@ -187,12 +187,9 @@ function GM:GivePlayerWeapons()
 	for _, Weapon in pairs(Weapons) do
 	  if pWeapon == Weapon.Class then
 	    ply:Give(Weapon.Class)
-	    timer.Simple(
-	      0,
-	      function()
-		ply:GiveAmmo(Weapon.Ammo, Weapon.AmmoClass)
-	      end
-	    )
+	    if Weapon.Ammo ~= nil and Weapon.AmmoClass ~= nil then
+	      timer.Simple(0, function() ply:GiveAmmo(Weapon.Ammo, Weapon.AmmoClass) end)
+	    end
 	  end
 	end
       end
@@ -207,20 +204,30 @@ function PlayerMeta:LoadData()
   local data = {}
   if file.Exists("flood/" .. self:UniqueID() .. ".txt", "DATA") then
     data = util.KeyValuesToTable(file.Read("flood/" .. self:UniqueID() .. ".txt", "DATA"))
-    self.Allow = true
-    return data
+    data.cash = tonumber(data.cash)
+    data.weapons = string.Explode("\n", data.weapons)
   else
+    -- Initialize player data.
     self:Save()
     data = util.KeyValuesToTable(file.Read("flood/" .. self:UniqueID() .. ".txt", "DATA"))
 
     -- Initialize cash to a value.
-    -- Weapons are initialized elsewhere.
     data.cash = 5000
 
+    -- Give player all weapons priced at $0.
+    data.weapons = {}
+    for _, weapon in pairs(Weapons) do
+      if weapon.Price == 0 then
+	table.insert(data.weapons, weapon.Class)
+      end
+    end
+
     self:Save()
-    self.Allow = true
-    return data
   end
+
+  self.Allow = true
+
+  return data
 end
 
 -- TODO: Make sure player's props are refunded

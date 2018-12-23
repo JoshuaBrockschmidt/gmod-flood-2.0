@@ -14,12 +14,24 @@ end
 --- Adds a weapon to the weapon list.
 -- @param weapon Table describing weapon.
 local function addWeapon(weapon)
+  if weapon.Price == nil or weapon.Price < 0 then
+    weapon.Price = 0
+  end
   table.insert(Weapons, weapon)
 end
 
-local FLOAT_PROPS = 1
-local ARMOR_PROPS = 2
+-- Prop category enumerators.
+local FLOAT_PROPS   = 1
+local ARMOR_PROPS   = 2
 local DONATOR_PROPS = 3
+
+-- Weapon category enumerators.
+local WEPS_HAND	 = 1 -- Handguns
+local WEPS_AUTO  = 2 -- Automatic weapons
+local WEPS_SHOT  = 3 -- Shotguns
+local WEPS_RANGE = 4
+local WEPS_EXPLO = 5 -- Explosive weapons
+local WEPS_OTHER = 6 -- Miscellaneous
 
 
 -- Prop categories.
@@ -29,7 +41,12 @@ PropCategories[DONATOR_PROPS] = "Donator Props"
 
 
 -- Weapon categories.
-WeaponCategories[1] = "Basic Weapons"
+WeaponCategories[WEPS_HAND]  = "Handguns"
+WeaponCategories[WEPS_AUTO]  = "Automatic Weapons"
+WeaponCategories[WEPS_SHOT]  = "Shotguns"
+WeaponCategories[WEPS_RANGE] = "Ranged Weapons"
+WeaponCategories[WEPS_EXPLO] = "Explosive Weapons"
+WeaponCategories[WEPS_OTHER] = "Miscellaneous"
 
 
 -- Bouyant props.
@@ -304,33 +321,22 @@ if INCLUDE_CSGO_PROPS then
 end
 
 
--- Add all weapons.
+-- Handguns.
 addWeapon({
-    Name = "Crossbow",
-    Model = "models/weapons/w_crossbow.mdl",
-    Group = 1,
-    Class = "weapon_crossbow",
-    Price = 25000,
-    Ammo = 1000,
-    AmmoClass = "XBowBolt",
-    Damage = 10,
-    DonatorOnly = false
-})
-addWeapon({
-    Name = "RPG",
-    Model = "models/weapons/w_rocket_launcher.mdl",
-    Group = 1,
-    Class = "weapon_rpg",
-    Price = 37500,
-    Ammo = 3,
-    AmmoClass = "RPG_Round",
-    Damage = 50,
+    Name = "Pistol",
+    Model = "models/weapons/w_Pistol.mdl",
+    Group = WEPS_HAND,
+    Class = "weapon_pistol",
+    Price = 0,
+    Ammo = 10000,
+    AmmoClass = "Pistol",
+    Damage = 2,
     DonatorOnly = false
 })
 addWeapon({
     Name = "357 Magnum",
     Model = "models/weapons/W_357.mdl",
-    Group = 1,
+    Group = WEPS_HAND,
     Class = "weapon_357",
     Price = 10000,
     Ammo = 1000,
@@ -338,54 +344,12 @@ addWeapon({
     Damage = 4,
     DonatorOnly = false
 })
-addWeapon({
-    Name = "Frag Grenade",
-    Model = "models/weapons/w_grenade.mdl",
-    Group = 1,
-    Class = "weapon_frag",
-    Price = 11250,
-    Ammo = 3,
-    AmmoClass = "Grenade",
-    Damage = 15,
-    DonatorOnly = false
-})
-addWeapon({
-    Name = "Crowbar",
-    Model = "models/weapons/w_crowbar.mdl",
-    Group = 1,
-    Class = "weapon_crowbar",
-    Price = 5000,
-    Ammo = 0,
-    AmmoClass = "Pistol",
-    Damage = 20,
-    DonatorOnly = false
-})
-addWeapon({
-    Name = "Shotgun",
-    Model = "models/weapons/w_shotgun.mdl",
-    Group = 1,
-    Class = "weapon_shotgun",
-    Price = 200000,
-    Ammo = 100,
-    AmmoClass = "Buckshot",
-    Damage = 8,
-    DonatorOnly = false
-})
-addWeapon({
-    Name = "SLAM",
-    Model = "models/weapons/w_slam.mdl",
-    Group = 1,
-    Class = "weapon_slam",
-    Price = 12500,
-    Ammo = 2,
-    AmmoClass = "slam",
-    Damage = 25,
-    DonatorOnly = false
-})
+
+-- Automatic weapons.
 addWeapon({
     Name = "SMG",
     Model = "models/weapons/w_smg1.mdl",
-    Group = 1,
+    Group = WEPS_AUTO,
     Class = "weapon_smg1",
     Price = 250000,
     Ammo = 500,
@@ -396,11 +360,83 @@ addWeapon({
 addWeapon({
     Name = "AR2",
     Model = "models/weapons/w_irifle.mdl",
-    Group = 1,
+    Group = WEPS_AUTO,
     Class = "weapon_ar2",
     Price = 750000,
     Ammo = 1000,
     AmmoClass = "AR2",
     Damage = 3,
+    DonatorOnly = false
+})
+
+-- Shotguns.
+addWeapon({
+    Name = "Shotgun",
+    Model = "models/weapons/w_shotgun.mdl",
+    Group = WEPS_SHOT,
+    Class = "weapon_shotgun",
+    Price = 200000,
+    Ammo = 100,
+    AmmoClass = "Buckshot",
+    Damage = 8,
+    DonatorOnly = false
+})
+
+-- Ranged weapons.
+addWeapon({
+    Name = "Crossbow",
+    Model = "models/weapons/w_crossbow.mdl",
+    Group = WEPS_RANGE,
+    Class = "weapon_crossbow",
+    Price = 25000,
+    Ammo = 1000,
+    AmmoClass = "XBowBolt",
+    Damage = 10,
+    DonatorOnly = false
+})
+
+-- Explosive weapons.
+addWeapon({
+    Name = "Frag Grenade",
+    Model = "models/weapons/w_grenade.mdl",
+    Group = WEPS_EXPLO,
+    Class = "weapon_frag",
+    Price = 11250,
+    Ammo = 3,
+    AmmoClass = "Grenade",
+    Damage = 15,
+    DonatorOnly = false
+})
+addWeapon({
+    Name = "SLAM",
+    Model = "models/weapons/w_slam.mdl",
+    Group = WEPS_EXPLO,
+    Class = "weapon_slam",
+    Price = 12500,
+    Ammo = 2,
+    AmmoClass = "slam",
+    Damage = 25,
+    DonatorOnly = false
+})
+addWeapon({
+    Name = "RPG",
+    Model = "models/weapons/w_rocket_launcher.mdl",
+    Group = WEPS_EXPLO,
+    Class = "weapon_rpg",
+    Price = 37500,
+    Ammo = 3,
+    AmmoClass = "RPG_Round",
+    Damage = 50,
+    DonatorOnly = false
+})
+
+-- Other weapons and items.
+addWeapon({
+    Name = "Crowbar",
+    Model = "models/weapons/w_crowbar.mdl",
+    Group = WEPS_OTHER,
+    Class = "weapon_crowbar",
+    Price = 0,
+    Damage = 10,
     DonatorOnly = false
 })
